@@ -1,5 +1,7 @@
 import React from "react";
-import { Stack } from "expo-router";
+import { Stack, Screen } from "expo-router";
+import WelcomePage from "./index.jsx";
+import HomePage from "./home.jsx";
 
 export default function Layout() {
   return (
@@ -9,7 +11,11 @@ export default function Layout() {
         headerTitleStyle: {
           fontWeight: "bold",
         },
+        headerShown: false,
       }}
-    />
+    >
+      <Screen name="Welcome" component={WelcomePage} />
+      <Screen name="Home" component={HomePage} />
+    </Stack>
   );
 }
