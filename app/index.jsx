@@ -9,14 +9,14 @@ import {
   Image,
 } from "react-native";
 import { useEffect, useState } from "react";
-import { useNavigation } from "expo-router";
+import { useNavigation, Link } from "expo-router";
 
 import clubFair from "../assets/club_fair.webp";
 
 const windowWidth = Dimensions.get("window").width;
 const windowHeight = Dimensions.get("window").height;
 
-export default function App() {
+const LoginPage = () => {
   const navigation = useNavigation();
 
   const [welcome, setWelcome] = useState(true);
@@ -63,12 +63,11 @@ export default function App() {
     return (
       <SafeAreaView style={styles.container}>
         <Text> Log In Page </Text>
-        <TouchableOpacity
-          style={styles.button}
-          onPress={() => navigation.navigate("Home")}
-        >
-          <Text style={styles.btnText}>Log In</Text>
-        </TouchableOpacity>
+        <Link href={"/home/mainFeed"} asChild>
+          <TouchableOpacity style={styles.button}>
+            <Text style={styles.btnText}>Log In</Text>
+          </TouchableOpacity>
+        </Link>
         <TouchableOpacity style={styles.button} onPress={showWelcome}>
           <Text style={styles.btnText}>Back</Text>
         </TouchableOpacity>
@@ -78,19 +77,22 @@ export default function App() {
     return (
       <SafeAreaView style={styles.container}>
         <Text> Sign Up Page </Text>
-        <TouchableOpacity
-          style={styles.button}
-          onPress={() => navigation.navigate("Home")}
-        >
-          <Text style={styles.btnText}>Create Account</Text>
-        </TouchableOpacity>
+
+        <Link href={"/home/mainFeed"} asChild>
+          <TouchableOpacity style={styles.button}>
+            <Text style={styles.btnText}>Create Account</Text>
+          </TouchableOpacity>
+        </Link>
+
         <TouchableOpacity style={styles.button} onPress={showWelcome}>
           <Text style={styles.btnText}>Back</Text>
         </TouchableOpacity>
       </SafeAreaView>
     );
   }
-}
+};
+
+export default LoginPage;
 
 const styles = StyleSheet.create({
   container: {
