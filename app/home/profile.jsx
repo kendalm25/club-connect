@@ -20,7 +20,6 @@ const HomePage = () => {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    // justifyContent: "center",
     alignItems: "center",
     backgroundColor: "#fff",
   },
@@ -31,7 +30,6 @@ const styles = StyleSheet.create({
 
   header: {
     marginTop: 5,
-    // backgroundColor: "green",
     width: "100%",
     justifyContent: "center",
     alignContent: "center",

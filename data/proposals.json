@@ -12,7 +12,7 @@
     "collab_benefits": "Shared resources, increased reach, split costs, enhanced networking opportunities.",
     "tasks_remaining": "Need clubs for marketing, logistics, and securing sponsors.",
     "budget": "Estimated total cost: $5000. Each club contributes $1250.",
-    "type": "workshop",
+    "type": ["tech", "workshop"],
     "similar_events": "Previous Hackathon had 80 attendees with positive feedback on learning outcomes."
   },
   {
@@ -28,7 +28,7 @@
     "collab_benefits": "Joint marketing efforts, shared logistical support, and enhanced community impact.",
     "tasks_remaining": "Looking for clubs to handle workshops, exhibitions, and guest speakers.",
     "budget": "Budget is $3000, hoping for each club to contribute around $750.",
-    "type": "community event",
+    "type": ["environmental", "community event"],
     "similar_events": "Last year's Green Campus Day attracted 250 people with very engaging activities and great feedback."
   },
   {
@@ -44,7 +44,7 @@
     "collab_benefits": "Exposure for artists, shared organizational duties, and broader audience reach.",
     "tasks_remaining": "Need help with setup, marketing, and managing sales transactions.",
     "budget": "Total expected budget is $2000, split equally among collaborating clubs.",
-    "type": "exhibition",
+    "type": ["exhibition", "art"],
     "similar_events": "Previous art fairs have been highly successful, with sales contributing to funding student art projects."
   },
   {
@@ -60,7 +60,7 @@
     "collab_benefits": "Shared resources, increased reach across colleges, joint media coverage.",
     "tasks_remaining": "Need help with event logistics, participant coordination, and publicity.",
     "budget": "Estimated budget is $3500, shared among participant colleges.",
-    "type": "competition",
+    "type": ["debate", "competition"],
     "similar_events": "Last year's event attracted over 150 participants and was featured in the college newsletter."
   },
   {
@@ -76,7 +76,7 @@
     "collab_benefits": "Opportunity for networking, resource sharing, and gaining insights from experienced entrepreneurs.",
     "tasks_remaining": "Seeking clubs to manage workshops, mentor matching, and investor pitches.",
     "budget": "Total budget of $4000, with contributions expected from sponsors and participant fees.",
-    "type": "workshop",
+    "type": ["workshop"],
     "similar_events": "Previous editions have successfully launched 10+ student-led startups."
   },
   {
@@ -92,7 +92,7 @@
     "collab_benefits": "Cultural exchange, enhanced visibility for foreign language departments, potential collaborations with local film societies.",
     "tasks_remaining": "Looking for clubs to handle film selections, guest speakers, and promotions.",
     "budget": "Expected budget is $5000, seeking funding through ticket sales and sponsorships.",
-    "type": "festival",
+    "type": ["festival", "film"],
     "similar_events": "Last year's festival drew large crowds and received positive media coverage."
   },
   {
@@ -108,7 +108,7 @@
     "collab_benefits": "Shared stage setup and promotional efforts, enhanced audience reach.",
     "tasks_remaining": "Need assistance with stage management, artist liaison, and event marketing.",
     "budget": "Estimated budget of $3000, partly covered by ticket sales.",
-    "type": "concert",
+    "type": ["concert"],
     "similar_events": "Previous concerts have been a major hit, drawing large crowds and fostering a love for jazz."
   },
   {
@@ -124,7 +124,7 @@
     "collab_benefits": "Exposure for upcoming poets, community building around the arts.",
     "tasks_remaining": "Looking for support in organizing, judging, and publicizing the event.",
     "budget": "Planned budget is $1000, covered by entry fees and small sponsorships.",
-    "type": "performance",
+    "type": ["performance"],
     "similar_events": "Last year's poetry night was highly acclaimed, with engaging performances and a large audience."
   },
   {
@@ -140,7 +140,7 @@
     "collab_benefits": "Joint organization with local adventure groups, shared equipment and safety training.",
     "tasks_remaining": "Organizing transport, securing camp sites, and coordinating safety briefings.",
     "budget": "Expected budget is $4500, including park fees and equipment rental.",
-    "type": "retreat",
+    "type": ["retreat", "wellness"],
     "similar_events": "Last year's event saw high participation and positive feedback from attendees."
   },
   {
@@ -156,7 +156,7 @@
     "collab_benefits": "Educational enrichment, fostering a community of informed students, potential partnerships with local filmmakers.",
     "tasks_remaining": "Film selection, guest speaker invitations, and promotional activities.",
     "budget": "Monthly budget of $500 for rights acquisition and guest honorariums.",
-    "type": "screening",
+    "type": ["screening", "film"],
     "similar_events": "Previous series were well-received, leading to active student engagements and panel discussions."
   },
   {
@@ -172,7 +172,7 @@
     "collab_benefits": "Strengthen community ties, provide mentorship opportunities, increase awareness of diversity issues in tech.",
     "tasks_remaining": "Securing sponsors, finalizing speakers, and marketing the event.",
     "budget": "Estimated budget is $10000, seeking corporate sponsorships and university support.",
-    "type": "conference",
+    "type": ["tech", "conference"],
     "similar_events": "Last year's event successfully attracted notable speakers and several tech company sponsors."
   },
   {
@@ -188,7 +188,7 @@
     "collab_benefits": "Engaging learning experience, enhanced visibility for history and theater departments.",
     "tasks_remaining": "Costume preparation, script development, participant training.",
     "budget": "Total budget of $3000, partially funded by the history department.",
-    "type": "educational",
+    "type": ["educational"],
     "similar_events": "Past reenactments have been crowd-pleasers with strong educational value."
   },
   {
@@ -204,7 +204,7 @@
     "collab_benefits": "Opportunity for students to engage with experts, enhance understanding of real-world economic issues.",
     "tasks_remaining": "Arranging guest speakers, setting up debate format, and promotional efforts.",
     "budget": "Planned budget of $2500, looking for departmental and external funding.",
-    "type": "debate",
+    "type": ["debate"],
     "similar_events": "Previous debates have facilitated lively discussions and high student involvement."
   }
 ]

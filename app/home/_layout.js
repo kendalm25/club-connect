@@ -1,7 +1,9 @@
-import { Tabs } from "expo-router";
+import { Tabs, useRouter } from "expo-router";
 import Ionicons from "@expo/vector-icons/Ionicons";
 
 export default function AppLayout() {
+  const router = useRouter();
+
   return (
     <Tabs
       screenOptions={{
