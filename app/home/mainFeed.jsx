@@ -121,7 +121,10 @@ const HomePage = () => {
         </Modal>
       </SafeAreaView>
 
-      <ScrollView style={styles.scrollView}>
+      <ScrollView
+        style={styles.scrollView}
+        showsVerticalScrollIndicator={false}
+      >
         {proposals.map((proposal) => (
           <TouchableOpacity
             key={proposal.id}
@@ -143,59 +146,48 @@ const HomePage = () => {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    alignItems: "center",
-    backgroundColor: "#fff",
+    backgroundColor: "#f0f0f0", // Soft gray background for a light theme
   },
-
-  text: {
-    fontSize: 20,
-    color: "#333",
-  },
-
   header: {
-    marginTop: 5,
+    padding: 20,
+    backgroundColor: "#ffffff", // Clean white header
     width: "100%",
-    justifyContent: "center",
-    alignContent: "center",
-    alignItems: "center",
-    borderBottomColor: "black",
-    borderBottomWidth: 2,
-  },
-
-  headerText: {
-    fontSize: 40,
-    color: "#4a4e69",
-    fontWeight: "800",
-    marginBottom: 20,
-    textAlign: "center",
-  },
-
-  modalView: {
-    marginTop: windowHeight * 0.1,
-    // backgroundColor: "rgb(255, 242, 232)",
-    backgroundColor: "white",
-    borderRadius: 10,
-    borderWidth: 5,
-    borderColor: "#e63946",
-    padding: 35,
     alignItems: "center",
     shadowColor: "#000",
-    shadowOffset: {
-      width: 0,
-      height: 2,
-    },
-    shadowOpacity: 0.25,
-    shadowRadius: 4,
-    elevation: 5,
-    height: windowHeight * 0.85,
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.1,
+    shadowRadius: 3,
+    elevation: 4, // Slight elevation for the header for a subtle shadow
+  },
+  headerText: {
+    fontSize: 24,
+    color: "#333",
+    fontWeight: "bold",
+  },
+  modalView: {
+    marginTop: windowHeight * 0.05,
+    // marginHorizontal: 20,
+    backgroundColor: "white",
+    borderRadius: 20,
+    padding: 20,
+    alignItems: "center",
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 20 },
+    shadowOpacity: 0.1,
+    shadowRadius: 40,
+    elevation: 20,
+    height: windowHeight * 0.95,
   },
 
+  // modalContent: {
+  //   maxHeight: windowHeight * 0.8,
+  // },
+
   modalText: {
-    marginBottom: 15,
     fontSize: 16,
-    color: "#333",
+    color: "#666",
+    marginBottom: 12,
     lineHeight: 24,
-    textAlign: "left",
   },
 
   boldText: {
@@ -203,25 +195,25 @@ const styles = StyleSheet.create({
   },
 
   btnContainer: {
-    display: "flex",
-    flexDirection: "column",
-    // gap: 10,
-    justifyContent: "center",
+    marginTop: 20,
+    width: "100%",
+    gap: 7,
   },
 
   closeButton: {
-    marginTop: 20,
     backgroundColor: "#4a4e69",
-    borderRadius: 10,
+    borderRadius: 20,
     paddingVertical: 10,
     paddingHorizontal: 20,
     alignSelf: "center",
   },
-
   btnText: {
     color: "white",
+    fontSize: 16,
     fontWeight: "bold",
-    textAlign: "center",
+  },
+  scrollView: {
+    marginVertical: 10,
   },
 });
 

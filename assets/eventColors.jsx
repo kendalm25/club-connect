@@ -29,6 +29,7 @@ const eventTypes = {
   engineering: "#CACFD2", // Silver
   legal: "#6E2C00", // Dark Brown
   film: "#489802", //some green
+  festival: "#194fbf",
 };
 
 export default eventTypes;

@@ -47,10 +47,8 @@ const LoginPage = () => {
         <View style={styles.content}>
           <Text style={styles.header}>ClubConnect</Text>
           <Image style={styles.image} source={clubFair} />
-          <TouchableOpacity style={styles.button}>
-            <Text style={styles.btnText} onPress={showLogIn}>
-              Log In
-            </Text>
+          <TouchableOpacity style={styles.button} onPress={showLogIn}>
+            <Text style={styles.btnText}>Log In</Text>
           </TouchableOpacity>
           <TouchableOpacity style={styles.button} onPress={showSignUp}>
             <Text style={styles.btnText}>Sign Up</Text>
@@ -62,31 +60,33 @@ const LoginPage = () => {
   } else if (logIn) {
     return (
       <SafeAreaView style={styles.container}>
-        <Text> Log In Page </Text>
-        <Link href={"/home/mainFeed"} asChild>
-          <TouchableOpacity style={styles.button}>
-            <Text style={styles.btnText}>Log In</Text>
+        <View style={styles.content}>
+          <Text style={styles.header}>Log In</Text>
+          <Link href={"/home/mainFeed"} asChild>
+            <TouchableOpacity style={styles.button}>
+              <Text style={styles.btnText}>Log In</Text>
+            </TouchableOpacity>
+          </Link>
+          <TouchableOpacity style={styles.button} onPress={showWelcome}>
+            <Text style={styles.btnText}>Back</Text>
           </TouchableOpacity>
-        </Link>
-        <TouchableOpacity style={styles.button} onPress={showWelcome}>
-          <Text style={styles.btnText}>Back</Text>
-        </TouchableOpacity>
+        </View>
       </SafeAreaView>
     );
   } else if (signUp) {
     return (
       <SafeAreaView style={styles.container}>
-        <Text> Sign Up Page </Text>
-
-        <Link href={"/home/mainFeed"} asChild>
-          <TouchableOpacity style={styles.button}>
-            <Text style={styles.btnText}>Create Account</Text>
+        <View style={styles.content}>
+          <Text style={styles.header}>Sign Up</Text>
+          <Link href={"/home/mainFeed"} asChild>
+            <TouchableOpacity style={styles.button}>
+              <Text style={styles.btnText}>Create Account</Text>
+            </TouchableOpacity>
+          </Link>
+          <TouchableOpacity style={styles.button} onPress={showWelcome}>
+            <Text style={styles.btnText}>Back</Text>
           </TouchableOpacity>
-        </Link>
-
-        <TouchableOpacity style={styles.button} onPress={showWelcome}>
-          <Text style={styles.btnText}>Back</Text>
-        </TouchableOpacity>
+        </View>
       </SafeAreaView>
     );
   }
@@ -97,44 +97,39 @@ export default LoginPage;
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: "#f8f9fa",
+    backgroundColor: "#ffffff", // Clean white background
     alignItems: "center",
     justifyContent: "center",
   },
-
   content: {
     alignItems: "center",
     padding: 20,
   },
-
   header: {
-    fontSize: 40,
-    color: "#4a4e69",
-    fontWeight: "800",
+    fontSize: 32, // Reduced size for more modern appearance
+    color: "#333",
+    fontWeight: "700", // Slightly lighter weight
     marginBottom: 20,
   },
-
   image: {
     width: windowWidth * 0.9,
     height: windowHeight * 0.3,
-    borderRadius: 10,
+    borderRadius: 20, // Increased border radius for a more modern look
     marginBottom: 20,
   },
-
   button: {
-    backgroundColor: "#e63946",
+    backgroundColor: "#4a4e69", // Consistent theme color
     paddingHorizontal: 30,
     paddingVertical: 12,
-    borderRadius: 20,
+    borderRadius: 25, // More pronounced rounded corners
     marginBottom: 10,
     width: windowWidth * 0.6,
-    elevation: 3, // For Android shadow
-    shadowColor: "#000", // For iOS shadow
+    elevation: 3, // Subtle shadow for depth
+    shadowColor: "#000",
     shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 0.1,
-    shadowRadius: 4,
+    shadowRadius: 6, // Smoother shadow
   },
-
   btnText: {
     color: "#ffffff",
     textAlign: "center",
