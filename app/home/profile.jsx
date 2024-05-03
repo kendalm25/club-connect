@@ -67,19 +67,39 @@ const styles = StyleSheet.create({
     alignItems: "center",
     backgroundColor: "#f0f0f0", // Soft gray background to match the main feed
   },
+
   profileHeader: {
-    width: "90%",
+    // width: "90%",
+    // alignItems: "center",
+    // paddingVertical: 20,
+    // paddingHorizontal: 5,
+    // borderRadius: 10,
+    // marginBottom: 5,
+    // backgroundColor: "#ffffff",
+    // shadowColor: "#000",
+    // shadowOffset: { width: 0, height: 2 },
+    // shadowOpacity: 0.1,
+    // shadowRadius: 6,
+    // elevation: 4,
+    padding: 20,
+    backgroundColor: "#ffffff",
+    width: "100%",
     alignItems: "center",
-    paddingTop: 20,
-    borderRadius: 10,
-    marginBottom: 25,
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.1,
+    shadowRadius: 3,
+    elevation: 4,
+    marginBottom: 10,
   },
+
   profilePic: {
     width: 120,
     height: 120,
     borderRadius: 60, // Full circle
     marginBottom: 10,
   },
+
   profileName: {
     fontSize: 22,
     fontWeight: "bold",
@@ -89,15 +109,15 @@ const styles = StyleSheet.create({
   tabBar: {
     flexDirection: "row",
     marginTop: 0,
-    width: "90%",
+    width: "100%",
     justifyContent: "space-around",
     backgroundColor: "#ffffff",
-    borderRadius: 10,
-    shadowColor: "#000",
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.1,
-    shadowRadius: 6,
-    elevation: 4,
+    // borderRadius: 10,
+    // shadowColor: "#000",
+    // shadowOffset: { width: 0, height: 2 },
+    // shadowOpacity: 0.1,
+    // shadowRadius: 6,
+    // elevation: 4,
   },
 
   tab: {
@@ -121,18 +141,20 @@ const styles = StyleSheet.create({
     color: "#4a4e69", // Highlight color
     fontWeight: "bold",
   },
+
   content: {
     flex: 1,
     width: "90%",
     padding: 20,
     marginTop: 5,
-    backgroundColor: "#ffffff",
+    // backgroundColor: "#ffffff",
     borderRadius: 10,
     shadowColor: "#000",
     shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 0.1,
     shadowRadius: 6,
     elevation: 4,
+    marginBottom: 5,
   },
 });
 

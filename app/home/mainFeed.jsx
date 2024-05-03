@@ -150,14 +150,14 @@ const styles = StyleSheet.create({
   },
   header: {
     padding: 20,
-    backgroundColor: "#ffffff", // Clean white header
+    backgroundColor: "#ffffff",
     width: "100%",
     alignItems: "center",
     shadowColor: "#000",
     shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 0.1,
     shadowRadius: 3,
-    elevation: 4, // Slight elevation for the header for a subtle shadow
+    elevation: 4,
   },
   headerText: {
     fontSize: 24,
