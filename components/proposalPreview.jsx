@@ -28,8 +28,8 @@ export default Proposal;
 
 const styles = StyleSheet.create({
   container: {
-    backgroundColor: "#ffffff", // Bright background to enhance the floating effect
-    borderRadius: 16, // More pronounced rounded corners
+    backgroundColor: "#ffffff",
+    borderRadius: 16,
     padding: 15,
     marginVertical: 8,
     marginHorizontal: 16,
@@ -40,38 +40,44 @@ const styles = StyleSheet.create({
     },
     shadowOpacity: 0.1,
     shadowRadius: 20,
-    elevation: 10, // Increased elevation for a more pronounced shadow on Android
+    elevation: 10,
   },
+
   title: {
     fontSize: 18,
     fontWeight: "bold",
-    marginBottom: 5, // Adds spacing between title and club name
+    marginBottom: 5,
   },
+
   club: {
     fontSize: 14,
     fontStyle: "italic",
-    color: "#666666", // Soften the color for a more subtle look
-    marginBottom: 5, // Adds spacing between club name and overview
+    color: "#666666",
+    marginBottom: 5,
   },
+
   overview: {
     fontSize: 15,
-    marginBottom: 10, // Adds spacing before the type tags
+    marginBottom: 10,
   },
+
   typeContainer: {
     flexDirection: "row",
-    flexWrap: "wrap", // Allows types to wrap to the next line if space is insufficient
+    flexWrap: "wrap",
     gap: 6,
   },
+
   type: {
-    borderRadius: 15, // More rounded edges for type tags
-    borderWidth: 0, // No border for a cleaner look
+    borderRadius: 15,
+    borderWidth: 0,
     paddingHorizontal: 10,
     paddingVertical: 5,
-    marginRight: 6, // Space between type tags
-    marginBottom: 6, // Space between rows of tags if wrapped
+    marginRight: 6,
+    marginBottom: 6,
   },
+
   typeText: {
-    color: "#ffffff", // White text for better readability on colored backgrounds
+    color: "#ffffff",
     fontSize: 12,
   },
 });

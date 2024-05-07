@@ -7,9 +7,12 @@ import {
   Image,
   Dimensions,
   TouchableOpacity,
+  ScrollView,
 } from "react-native";
 
 import clubImage from "../../assets/club-image.png";
+import proposals from "../../data/ssieProposals.json";
+import Proposal from "../../components/proposalPreview";
 
 const windowHeight = Dimensions.get("window").height;
 const windowWidth = Dimensions.get("window").width;
@@ -49,12 +52,43 @@ const HomePage = () => {
           onPress={() => setSelectedTab("Proposals")}
         />
       </View>
-      <View style={styles.content}>
+      <View style={{ width: "100%", flex: 1 }}>
         {selectedTab === "ClubInfo" && (
-          <Text>Club Info (email, website, instagram)</Text>
+          <View style={styles.infoContent}>
+            <Text style={styles.contentHeader}>Email:</Text>
+            <Text style={styles.contentText}>ssie.stanford@gmail.com</Text>
+            <Text style={styles.contentHeader}>Website:</Text>
+            <Text style={styles.contentText}>ssie.stanford.edu</Text>
+            <Text style={styles.contentHeader}>Instagram:</Text>
+            <Text style={styles.contentText}>@ssie.stanford</Text>
+          </View>
         )}
         {selectedTab === "Proposals" && (
-          <Text>List if all proposals (number of total proposals)</Text>
+          <View style={{ flex: 1 }}>
+            <View style={styles.createBtnContainer}>
+              <TouchableOpacity style={styles.createBtn}>
+                <Text style={styles.btnText}> + Create New Proposal</Text>
+              </TouchableOpacity>
+            </View>
+            <ScrollView
+              style={styles.scrollView}
+              showsVerticalScrollIndicator={false}
+            >
+              {proposals.map((proposal) => (
+                <TouchableOpacity
+                  key={proposal.id}
+                  onPress={() => handlePress(proposal)}
+                >
+                  <Proposal
+                    title={proposal.title}
+                    overview={proposal.overview}
+                    type={proposal.type}
+                    club={proposal.club}
+                  />
+                </TouchableOpacity>
+              ))}
+            </ScrollView>
+          </View>
         )}
       </View>
     </SafeAreaView>
@@ -65,22 +99,10 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     alignItems: "center",
-    backgroundColor: "#f0f0f0", // Soft gray background to match the main feed
+    backgroundColor: "#f0f0f0",
   },
 
   profileHeader: {
-    // width: "90%",
-    // alignItems: "center",
-    // paddingVertical: 20,
-    // paddingHorizontal: 5,
-    // borderRadius: 10,
-    // marginBottom: 5,
-    // backgroundColor: "#ffffff",
-    // shadowColor: "#000",
-    // shadowOffset: { width: 0, height: 2 },
-    // shadowOpacity: 0.1,
-    // shadowRadius: 6,
-    // elevation: 4,
     padding: 20,
     backgroundColor: "#ffffff",
     width: "100%",
@@ -96,14 +118,14 @@ const styles = StyleSheet.create({
   profilePic: {
     width: 120,
     height: 120,
-    borderRadius: 60, // Full circle
+    borderRadius: 60,
     marginBottom: 10,
   },
 
   profileName: {
     fontSize: 22,
     fontWeight: "bold",
-    color: "#333", // Darker font color
+    color: "#333",
   },
 
   tabBar: {
@@ -112,49 +134,80 @@ const styles = StyleSheet.create({
     width: "100%",
     justifyContent: "space-around",
     backgroundColor: "#ffffff",
-    // borderRadius: 10,
-    // shadowColor: "#000",
-    // shadowOffset: { width: 0, height: 2 },
-    // shadowOpacity: 0.1,
-    // shadowRadius: 6,
-    // elevation: 4,
   },
 
   tab: {
     padding: 10,
-    flexGrow: 1, // Equal width for all tabs
+    flexGrow: 1,
     alignItems: "center",
     justifyContent: "center",
   },
 
   selectedTab: {
     borderBottomWidth: 3,
-    borderBottomColor: "#4a4e69", // Primary color for emphasis
+    borderBottomColor: "#4a4e69",
   },
 
   tabText: {
     fontSize: 16,
-    color: "#666", // Consistent text color
+    color: "#666",
   },
 
   selectedTabText: {
-    color: "#4a4e69", // Highlight color
+    color: "#4a4e69",
     fontWeight: "bold",
   },
 
-  content: {
+  infoContent: {
     flex: 1,
-    width: "90%",
+    width: "100%",
     padding: 20,
     marginTop: 5,
-    // backgroundColor: "#ffffff",
-    borderRadius: 10,
     shadowColor: "#000",
     shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 0.1,
     shadowRadius: 6,
     elevation: 4,
     marginBottom: 5,
+    backgroundColor: "white",
+  },
+
+  contentContainer: {
+    alignItems: "flex-start",
+  },
+
+  contentHeader: {
+    fontSize: 18,
+    fontWeight: "600",
+    marginBottom: 5,
+    color: "#333",
+  },
+
+  contentText: {
+    fontSize: 16,
+    marginBottom: 15,
+    color: "#555",
+  },
+
+  createBtnContainer: {
+    marginVertical: 15,
+    alignItems: "center",
+  },
+
+  createBtn: {
+    borderRadius: 10,
+    padding: 10,
+    alignItems: "center",
+    width: "80%",
+    backgroundColor: "white",
+    shadowColor: "#000",
+    shadowOffset: {
+      width: 0,
+      height: 10,
+    },
+    shadowOpacity: 0.1,
+    shadowRadius: 20,
+    elevation: 10,
   },
 });
 

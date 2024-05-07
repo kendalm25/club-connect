@@ -1,0 +1,50 @@
+[
+  {
+    "id": 100,
+    "club": "Stanford Students in Entertainment",
+    "title": "Pitch Night",
+    "overview": "A 48-hour coding marathon where students create tech solutions for local businesses.",
+    "objectives": "Foster practical coding skills and connect students with potential employers.",
+    "audience": "Computer science and engineering students.",
+    "date": "2024-03-15 to 2024-03-17",
+    "venue": "Engineering Building, Room 101",
+    "attendance": "Expected 100 participants",
+    "collab_benefits": "Shared resources, increased reach, split costs, enhanced networking opportunities.",
+    "tasks_remaining": "Need clubs for marketing, logistics, and securing sponsors.",
+    "budget": "Estimated total cost: $5000. Each club contributes $1250.",
+    "type": ["film", "workshop"],
+    "similar_events": "Previous Hackathon had 80 attendees with positive feedback on learning outcomes."
+  },
+  {
+    "id": 200,
+    "club": "Stanford Students in Entertainment",
+    "title": "Pitch Perfect Screening",
+    "overview": "An event promoting sustainability and eco-friendly practices on campus.",
+    "objectives": "Increase awareness about environmental issues and engage students in sustainable practices.",
+    "audience": "All university students and faculty interested in sustainability.",
+    "date": "2024-04-22",
+    "venue": "University Commons",
+    "attendance": "Expected 300 attendees",
+    "collab_benefits": "Joint marketing efforts, shared logistical support, and enhanced community impact.",
+    "tasks_remaining": "Looking for clubs to handle workshops, exhibitions, and guest speakers.",
+    "budget": "Budget is $3000, hoping for each club to contribute around $750.",
+    "type": ["screening", "film"],
+    "similar_events": "Last year's Green Campus Day attracted 250 people with very engaging activities and great feedback."
+  },
+  {
+    "id": 300,
+    "club": "Stanford Students in Entertainment",
+    "title": "Q&A witH Director",
+    "overview": "A showcase of student artwork, including paintings, sculptures, and installations.",
+    "objectives": "Promote student artists and foster an appreciation of art within the university community.",
+    "audience": "Students, faculty, and external visitors interested in art.",
+    "date": "2024-05-10 to 2024-05-12",
+    "venue": "Art Department, Open Grounds",
+    "attendance": "Expected 200 visitors daily",
+    "collab_benefits": "Exposure for artists, shared organizational duties, and broader audience reach.",
+    "tasks_remaining": "Need help with setup, marketing, and managing sales transactions.",
+    "budget": "Total expected budget is $2000, split equally among collaborating clubs.",
+    "type": ["educational"],
+    "similar_events": "Previous art fairs have been highly successful, with sales contributing to funding student art projects."
+  }
+]
