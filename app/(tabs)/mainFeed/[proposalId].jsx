@@ -12,7 +12,7 @@ import { useNavigate } from "react-router-dom";
 import { useRouter } from "react-router";
 import { useLocalSearchParams } from "expo-router";
 import proposals from "../../../data/proposals.json"; // Adjust to the correct relative path
-
+import eventTypes from "../../../assets/eventColors";
 const windowHeight = Dimensions.get("window").height;
 
 const ProposalDetailsPage = () => {
@@ -21,6 +21,9 @@ const ProposalDetailsPage = () => {
   console.log("proposal id is: ", proposalId);
   const proposal = proposals.find((p) => p.id === numericProposalId);
   console.log("proposal: ", proposal);
+  const backgroundColors = proposal.type
+    .map((t) => eventTypes[t] || "#fff")
+    .join(", "); // Simple example of combining colors
 
   if (!proposal) {
     return (
@@ -34,19 +37,33 @@ const ProposalDetailsPage = () => {
     <SafeAreaView style={styles.container}>
       <ScrollView
         showsVerticalScrollIndicator={false}
-        style={styles.detailsScrollView}
+        contentContainerStyle={styles.detailsScrollView}
       >
-        <Text style={styles.infoText}>
-          <Text style={styles.label}>Proposed By:</Text> {proposal.club}
-        </Text>
-        <Text style={styles.infoText}>
-          <Text style={styles.label}>Title:</Text> {proposal.title}
-        </Text>
-        <Text style={styles.infoText}>
-          <Text style={styles.label}>Event Type(s):</Text> {proposal.type}
-        </Text>
+        <View style={styles.header}>
+          <Text style={styles.title}>{proposal.title}</Text>
+
+          <Text style={styles.club}>
+            <Text style={styles.label}>Proposed By:</Text> {proposal.club}
+          </Text>
+          <View style={styles.typeContainer}>
+            {proposal.type.map((t, index) => (
+              <Text
+                key={index}
+                style={[
+                  styles.type,
+                  { backgroundColor: eventTypes[t] || "#fff" },
+                ]}
+              >
+                {t}
+              </Text>
+            ))}
+          </View>
+        </View>
         <Text style={styles.infoText}>
           <Text style={styles.label}>Overview:</Text> {proposal.overview}
+        </Text>
+        <Text style={styles.infoText}>
+          <Text style={styles.label}>Planned Date(s):</Text> {proposal.date}
         </Text>
         <Text style={styles.infoText}>
           <Text style={styles.label}>Objectives:</Text> {proposal.objectives}
@@ -54,9 +71,7 @@ const ProposalDetailsPage = () => {
         <Text style={styles.infoText}>
           <Text style={styles.label}>Audience:</Text> {proposal.audience}
         </Text>
-        <Text style={styles.infoText}>
-          <Text style={styles.label}>Planned Date(s):</Text> {proposal.date}
-        </Text>
+
         <Text style={styles.infoText}>
           <Text style={styles.label}>Venue:</Text> {proposal.venue}
         </Text>
@@ -94,46 +109,95 @@ export default ProposalDetailsPage;
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: "white",
+    backgroundColor: "#f8f9fa", // Light gray for a neutral background
+    // paddingHorizontal: 15,
+    // paddingVertical: 10,
   },
 
-  // centeredContainer: {
-  //   flex: 1,
-  //   justifyContent: "center",
-  //   alignItems: "center",
-  //   backgroundColor: "white",
-  // },
+  header: {
+    alignItems: "center",
+    marginBottom: 0,
+  },
+
+  title: {
+    fontSize: 24,
+    fontWeight: "bold",
+    color: "#343a40", // Dark gray for titles
+    marginBottom: 10,
+    textAlign: "center",
+  },
+
+  club: {
+    fontSize: 16,
+    color: "#6c757d", // Secondary color for text
+    marginBottom: 15,
+    fontStyle: "italic",
+  },
+
+  typeContainer: {
+    flexDirection: "row",
+    flexWrap: "wrap",
+    justifyContent: "center", // Center types horizontally
+    gap: 8,
+    marginBottom: 20,
+  },
+
+  type: {
+    backgroundColor: "#495057", // Darker background for tags
+    borderRadius: 15,
+    paddingHorizontal: 12,
+    paddingVertical: 5,
+  },
+
+  typeText: {
+    color: "#ffffff",
+    fontSize: 14,
+    fontWeight: "600", // Semi-bold for text contrast
+  },
 
   detailsScrollView: {
-    padding: 20,
-    // flex: 1,
-    borderWidth: 2,
+    backgroundColor: "#ffffff", // White card-like background
+    borderRadius: 15,
+    paddingHorizontal: 20,
+    paddingVertical: 25,
+    marginBottom: 15,
+    boxShadow: "0 4px 8px rgba(0,0,0,0.1)", // Shadow for depth
   },
 
   infoText: {
     fontSize: 16,
-    color: "#666",
-    marginBottom: 12,
+    color: "#495057", // Darker gray for text
+    marginBottom: 16,
     lineHeight: 24,
   },
+
   label: {
     fontWeight: "bold",
+    color: "#212529", // Black color for emphasis
   },
+
   buttonContainer: {
-    marginTop: 20,
+    marginTop: 25,
     width: "100%",
-    gap: 10,
+    alignItems: "center",
   },
+
   actionButton: {
-    backgroundColor: "#4a4e69",
+    backgroundColor: "#4a4e69", // Purple for contrast
     borderRadius: 20,
-    paddingVertical: 10,
-    paddingHorizontal: 20,
-    alignSelf: "center",
+    paddingVertical: 12,
+    paddingHorizontal: 25,
+    // alignSelf: "center",
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.3,
+    shadowRadius: 3,
+    elevation: 4,
   },
+
   buttonText: {
     color: "white",
-    fontSize: 16,
+    fontSize: 18,
     fontWeight: "bold",
   },
 });

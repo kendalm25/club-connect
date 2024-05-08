@@ -11,22 +11,19 @@ const StacksLayout = () => {
         },
       }}
     >
-      {/* Main page or index */}
       <Stack.Screen
         name="index"
         options={{
-          headerShown: false, // Set to true if you want a header for the main page
-          title: "Proposals Home",
+          headerShown: false,
           headerBackTitle: "Back",
         }}
       />
 
-      {/* Dynamic screen for individual proposal details */}
       <Stack.Screen
         name="[proposalId]"
         options={{
           headerShown: true,
-          title: "Proposal Details", // Customize the title dynamically if needed
+          title: "",
           headerBackTitle: "Back",
         }}
       />

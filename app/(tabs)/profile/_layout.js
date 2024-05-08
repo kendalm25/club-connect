@@ -4,7 +4,14 @@ import { Stack } from "expo-router";
 
 const stacksLayout = () => {
   return (
-    <Stack>
+    <Stack
+      screenOptions={{
+        headerTintColor: "#000",
+        headerTitleStyle: {
+          fontWeight: "bold",
+        },
+      }}
+    >
       <Stack.Screen
         name="index"
         options={{
@@ -15,7 +22,7 @@ const stacksLayout = () => {
         name="createProposal"
         options={{
           headerShown: true,
-          title: "Create Proposal",
+          title: "Create New Proposal",
           headerBackTitle: "Back",
         }}
       />

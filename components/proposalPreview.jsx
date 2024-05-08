@@ -1,6 +1,5 @@
 import React from "react";
 import { View, Text, StyleSheet } from "react-native";
-import eventColors from "../assets/eventColors";
 import eventTypes from "../assets/eventColors";
 
 const Proposal = ({ title, overview, type, club }) => {
