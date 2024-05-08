@@ -8,11 +8,14 @@ import {
   Dimensions,
   TouchableOpacity,
   ScrollView,
+  Pressable,
 } from "react-native";
 
-import clubImage from "../../assets/club-image.png";
-import proposals from "../../data/ssieProposals.json";
-import Proposal from "../../components/proposalPreview";
+import { useNavigation, Link, useRouter, router } from "expo-router";
+
+import clubImage from "../../../assets/club-image.png";
+import proposals from "../../../data/ssieProposals.json";
+import Proposal from "../../../components/proposalPreview";
 
 const windowHeight = Dimensions.get("window").height;
 const windowWidth = Dimensions.get("window").width;
@@ -30,6 +33,7 @@ const Tab = ({ title, isSelected, onPress }) => (
 
 const HomePage = () => {
   const [selectedTab, setSelectedTab] = useState("ClubInfo");
+  const router = useRouter();
 
   return (
     <SafeAreaView style={styles.container}>
@@ -38,7 +42,6 @@ const HomePage = () => {
         <Text style={styles.profileName}>
           Stanford Students in Entertainment
         </Text>
-        {/* <Text style={styles.profilePID}>Club Id: 123</Text> */}
       </View>
       <View style={styles.tabBar}>
         <Tab
@@ -66,19 +69,25 @@ const HomePage = () => {
         {selectedTab === "Proposals" && (
           <View style={{ flex: 1 }}>
             <View style={styles.createBtnContainer}>
-              <TouchableOpacity style={styles.createBtn}>
-                <Text style={styles.btnText}> + Create New Proposal</Text>
+              {/* <Link href="/createProposal" asChild> */}
+              <TouchableOpacity
+                style={styles.createBtn}
+                onPress={() =>
+                  router.push({
+                    pathname: "/(tabs)/profile/createProposal",
+                  })
+                }
+              >
+                <Text style={styles.btnText}>+ Create New Proposal</Text>
               </TouchableOpacity>
+              {/* </Link> */}
             </View>
             <ScrollView
               style={styles.scrollView}
               showsVerticalScrollIndicator={false}
             >
               {proposals.map((proposal) => (
-                <TouchableOpacity
-                  key={proposal.id}
-                  onPress={() => handlePress(proposal)}
-                >
+                <TouchableOpacity key={proposal.id}>
                   <Proposal
                     title={proposal.title}
                     overview={proposal.overview}

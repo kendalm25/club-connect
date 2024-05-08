@@ -62,7 +62,7 @@ const LoginPage = () => {
       <SafeAreaView style={styles.container}>
         <View style={styles.content}>
           <Text style={styles.header}>Log In</Text>
-          <Link href={"/home/mainFeed"} asChild>
+          <Link href={"/(tabs)/mainFeed"} asChild>
             <TouchableOpacity style={styles.button}>
               <Text style={styles.btnText}>Log In</Text>
             </TouchableOpacity>
@@ -78,7 +78,7 @@ const LoginPage = () => {
       <SafeAreaView style={styles.container}>
         <View style={styles.content}>
           <Text style={styles.header}>Sign Up</Text>
-          <Link href={"/home/mainFeed"} asChild>
+          <Link href={"/(tabs)/mainFeed"} asChild>
             <TouchableOpacity style={styles.button}>
               <Text style={styles.btnText}>Create Account</Text>
             </TouchableOpacity>

@@ -1,7 +1,7 @@
 import React from "react";
 import { Stack, Screen } from "expo-router";
 import WelcomePage from "./index.jsx";
-import HomePage from "./home/mainFeed.jsx";
+import HomePage from "./(tabs)/mainFeed/index.jsx";
 
 export default function StackLayout() {
   return (
@@ -14,8 +14,8 @@ export default function StackLayout() {
         headerShown: false,
       }}
     >
-      <Screen name="index" component={WelcomePage} />
-      <Screen name="Home" component={HomePage} />
+      <Stack.Screen name="index" />
+      <Stack.Screen name="(tabs)" />
     </Stack>
   );
 }

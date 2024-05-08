@@ -28,6 +28,13 @@ export default function AppLayout() {
           ),
         }}
       />
+
+      <Tabs.Screen
+        name="index"
+        options={{
+          tabBarButton: () => null, // Hides the button from the tab bar
+        }}
+      />
     </Tabs>
   );
 }
