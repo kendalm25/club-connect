@@ -55,7 +55,7 @@ const HomePage = () => {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: "#f0f0f0", // Soft gray background for a light theme
+    backgroundColor: "#f0f0f0",
   },
 
   header: {
@@ -74,54 +74,7 @@ const styles = StyleSheet.create({
     color: "#333",
     fontWeight: "bold",
   },
-  modalView: {
-    marginTop: windowHeight * 0.05,
-    // marginHorizontal: 20,
-    backgroundColor: "white",
-    borderRadius: 20,
-    padding: 20,
-    alignItems: "center",
-    shadowColor: "#000",
-    shadowOffset: { width: 0, height: 20 },
-    shadowOpacity: 0.1,
-    shadowRadius: 40,
-    elevation: 20,
-    height: windowHeight * 0.95,
-  },
 
-  // modalContent: {
-  //   maxHeight: windowHeight * 0.8,
-  // },
-
-  modalText: {
-    fontSize: 16,
-    color: "#666",
-    marginBottom: 12,
-    lineHeight: 24,
-  },
-
-  boldText: {
-    fontWeight: "bold",
-  },
-
-  btnContainer: {
-    marginTop: 20,
-    width: "100%",
-    gap: 7,
-  },
-
-  closeButton: {
-    backgroundColor: "#4a4e69",
-    borderRadius: 20,
-    paddingVertical: 10,
-    paddingHorizontal: 20,
-    alignSelf: "center",
-  },
-  btnText: {
-    color: "white",
-    fontSize: 16,
-    fontWeight: "bold",
-  },
   scrollView: {
     marginVertical: 10,
   },

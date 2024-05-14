@@ -10,6 +10,16 @@ export default function AppLayout() {
       }}
     >
       <Tabs.Screen
+        name="calendar"
+        options={{
+          tabBarLabel: "Calendar",
+          tabBarIcon: ({ size, color }) => (
+            <Ionicons name="calendar-outline" size={size} color={color} />
+          ),
+        }}
+      />
+
+      <Tabs.Screen
         name="mainFeed"
         options={{
           tabBarLabel: "Feed",

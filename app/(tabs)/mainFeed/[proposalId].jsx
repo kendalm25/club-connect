@@ -63,7 +63,10 @@ const ProposalDetailsPage = () => {
           <Text style={styles.label}>Overview:</Text> {proposal.overview}
         </Text>
         <Text style={styles.infoText}>
-          <Text style={styles.label}>Planned Date(s):</Text> {proposal.date}
+          <Text style={styles.label}>Start Date:</Text> {proposal.start_date}
+        </Text>
+        <Text style={styles.infoText}>
+          <Text style={styles.label}>End Date:</Text> {proposal.end_date}
         </Text>
         <Text style={styles.infoText}>
           <Text style={styles.label}>Objectives:</Text> {proposal.objectives}
@@ -110,8 +113,6 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: "#f8f9fa", // Light gray for a neutral background
-    // paddingHorizontal: 15,
-    // paddingVertical: 10,
   },
 
   header: {

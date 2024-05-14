@@ -7,17 +7,18 @@ import {
   SafeAreaView,
   ScrollView,
   TouchableOpacity,
+  Alert,
 } from "react-native";
 import eventTypes from "../../../assets/eventColors";
 
-const CreatePage = () => {
-  // State for all proposal fields
+const CreatePage = ({ onSubmit }) => {
   const [title, setTitle] = useState("");
   const [club, setClub] = useState("");
   const [overview, setOverview] = useState("");
   const [objectives, setObjectives] = useState("");
   const [audience, setAudience] = useState("");
-  const [date, setDate] = useState("");
+  const [startDate, setStartDate] = useState("");
+  const [endDate, setEndDate] = useState("");
   const [venue, setVenue] = useState("");
   const [attendance, setAttendance] = useState("");
   const [collabBenefits, setCollabBenefits] = useState("");
@@ -25,7 +26,7 @@ const CreatePage = () => {
   const [similarEvents, setSimilarEvents] = useState("");
   const [tasks, setTasks] = useState([]);
   const [newTask, setNewTask] = useState("");
-  const [types, setTypes] = useState([]); // State to store selected types
+  const [types, setTypes] = useState([]);
 
   // Function to add a new task
   const addTask = () => {
@@ -44,35 +45,48 @@ const CreatePage = () => {
     }
   };
 
-  // Function to handle form submission (example)
+  // Function to handle form submission
   const handleSubmit = () => {
-    const proposalData = {
-      title,
-      club,
-      overview,
-      objectives,
-      audience,
-      date,
-      venue,
-      attendance,
-      collabBenefits,
-      budget,
-      similarEvents,
-      tasks,
-      types, // Include selected types
-    };
+    if (
+      startDate.match(/^\d{4}-\d{2}-\d{2}$/) &&
+      endDate.match(/^\d{4}-\d{2}-\d{2}$/)
+    ) {
+      const proposalData = {
+        title,
+        club,
+        overview,
+        objectives,
+        audience,
+        start_date: startDate,
+        end_date: endDate,
+        venue,
+        attendance,
+        collab_benefits: collabBenefits,
+        budget,
+        similar_events: similarEvents,
+        tasks,
+        types,
+      };
 
-    // Log data or send it to a server
-    console.log("New Proposal Data:", proposalData);
+      console.log("New Proposal Data:", proposalData);
+
+      if (onSubmit) {
+        onSubmit(proposalData);
+      }
+    } else {
+      Alert.alert(
+        "Invalid Date Format",
+        "Please enter dates in the YYYY-MM-DD format"
+      );
+    }
   };
 
   return (
     <SafeAreaView style={styles.container}>
       <ScrollView contentContainerStyle={styles.scrollViewContent}>
-        {/* Proposal Fields */}
         <TextInput
           style={styles.input}
-          placeholder="Title"
+          placeholder="Name of Event"
           value={title}
           onChangeText={setTitle}
         />
@@ -103,12 +117,28 @@ const CreatePage = () => {
           onChangeText={setAudience}
           multiline
         />
-        <TextInput
-          style={styles.input}
-          placeholder="Date(s)"
-          value={date}
-          onChangeText={setDate}
-        />
+        <View style={styles.setDates}>
+          <View style={styles.setDateBox}>
+            <Text style={styles.label}>Start Date</Text>
+            <TextInput
+              style={styles.input}
+              value={startDate}
+              onChangeText={setStartDate}
+              placeholder="YYYY-MM-DD"
+            />
+          </View>
+
+          <View style={styles.setDateBox}>
+            <Text style={styles.label}>End Date</Text>
+            <TextInput
+              style={styles.input}
+              value={endDate}
+              onChangeText={setEndDate}
+              placeholder="YYYY-MM-DD"
+            />
+          </View>
+        </View>
+
         <TextInput
           style={styles.input}
           placeholder="Venue"
@@ -195,7 +225,6 @@ const CreatePage = () => {
           </View>
         </View>
 
-        {/* Submit Button */}
         <TouchableOpacity style={styles.submitButton} onPress={handleSubmit}>
           <Text style={styles.buttonText}>Submit Proposal</Text>
         </TouchableOpacity>
@@ -204,19 +233,15 @@ const CreatePage = () => {
   );
 };
 
-export default CreatePage;
-
 const styles = StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: "#f8f9fa",
   },
-
   scrollViewContent: {
     paddingHorizontal: 20,
     paddingVertical: 30,
   },
-
   input: {
     borderWidth: 1,
     borderColor: "#ced4da",
@@ -225,37 +250,43 @@ const styles = StyleSheet.create({
     marginBottom: 15,
     backgroundColor: "#ffffff",
   },
-
+  label: {
+    color: "gray",
+  },
   textArea: {
     minHeight: 80,
     textAlignVertical: "top",
   },
-
+  setDates: {
+    display: "flex",
+    flexDirection: "row",
+    justifyContent: "space-between",
+    gap: 10,
+  },
+  setDateBox: {
+    flex: 1,
+  },
   tasksSection: {
     marginTop: 20,
     marginBottom: 30,
   },
-
   tasksTitle: {
     fontSize: 20,
     fontWeight: "bold",
     color: "#495057",
     marginBottom: 10,
   },
-
   taskItem: {
     fontSize: 16,
     color: "#495057",
     marginBottom: 8,
   },
-
   taskInputContainer: {
     flexDirection: "row",
     alignItems: "center",
     display: "flex",
     gap: 10,
   },
-
   taskInput: {
     borderWidth: 1,
     borderColor: "#ced4da",
@@ -264,7 +295,6 @@ const styles = StyleSheet.create({
     flex: 5,
     backgroundColor: "#ffffff",
   },
-
   addTaskButton: {
     backgroundColor: "#4a4e69",
     borderRadius: 10,
@@ -273,24 +303,20 @@ const styles = StyleSheet.create({
     flex: 1,
     alignItems: "center",
   },
-
   typesContainer: {
     flexDirection: "row",
     flexWrap: "wrap",
     gap: 8,
   },
-
   typeButton: {
     borderRadius: 15,
     paddingHorizontal: 12,
     paddingVertical: 5,
   },
-
   typeButtonText: {
     fontSize: 14,
     fontWeight: "600",
   },
-
   submitButton: {
     backgroundColor: "#4a4e69",
     borderRadius: 20,
@@ -298,10 +324,11 @@ const styles = StyleSheet.create({
     paddingHorizontal: 25,
     alignSelf: "center",
   },
-
   buttonText: {
     color: "#ffffff",
     fontSize: 16,
     fontWeight: "bold",
   },
 });
+
+export default CreatePage;

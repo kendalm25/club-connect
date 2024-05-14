@@ -69,7 +69,6 @@ const HomePage = () => {
         {selectedTab === "Proposals" && (
           <View style={{ flex: 1 }}>
             <View style={styles.createBtnContainer}>
-              {/* <Link href="/createProposal" asChild> */}
               <TouchableOpacity
                 style={styles.createBtn}
                 onPress={() =>
@@ -80,7 +79,6 @@ const HomePage = () => {
               >
                 <Text style={styles.btnText}>+ Create New Proposal</Text>
               </TouchableOpacity>
-              {/* </Link> */}
             </View>
             <ScrollView
               style={styles.scrollView}
