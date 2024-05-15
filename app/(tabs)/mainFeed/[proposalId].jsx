@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useState } from "react";
 import {
   View,
   Text,
@@ -7,23 +7,42 @@ import {
   ScrollView,
   TouchableOpacity,
   Dimensions,
+  Modal,
+  TextInput,
+  Button,
 } from "react-native";
-import { useNavigate } from "react-router-dom";
-import { useRouter } from "react-router";
+import { CheckBox } from "react-native-elements";
 import { useLocalSearchParams } from "expo-router";
 import proposals from "../../../data/proposals.json"; // Adjust to the correct relative path
 import eventTypes from "../../../assets/eventColors";
+
 const windowHeight = Dimensions.get("window").height;
 
 const ProposalDetailsPage = () => {
   const { proposalId } = useLocalSearchParams();
   const numericProposalId = parseInt(proposalId, 10);
-  console.log("proposal id is: ", proposalId);
   const proposal = proposals.find((p) => p.id === numericProposalId);
-  console.log("proposal: ", proposal);
-  const backgroundColors = proposal.type
-    .map((t) => eventTypes[t] || "#fff")
-    .join(", "); // Simple example of combining colors
+
+  const [checkedItems, setCheckedItems] = useState(
+    proposal.tasks_remaining.map(() => false)
+  );
+  const [modalVisible, setModalVisible] = useState(false);
+  const [clubName, setClubName] = useState("");
+  const [additionalInfo, setAdditionalInfo] = useState("");
+
+  const handleCheck = (index) => {
+    const newCheckedItems = [...checkedItems];
+    newCheckedItems[index] = !newCheckedItems[index];
+    setCheckedItems(newCheckedItems);
+  };
+
+  const handleSubmit = () => {
+    // Implement the logic to send the interest details to the proposal club
+    console.log("Club Name:", clubName);
+    console.log("Checked Tasks:", checkedItems);
+    console.log("Additional Info:", additionalInfo);
+    setModalVisible(false);
+  };
 
   if (!proposal) {
     return (
@@ -63,10 +82,11 @@ const ProposalDetailsPage = () => {
           <Text style={styles.label}>Overview:</Text> {proposal.overview}
         </Text>
         <Text style={styles.infoText}>
-          <Text style={styles.label}>Start Date:</Text> {proposal.start_date}
+          <Text style={styles.label}>Event Start Date:</Text>{" "}
+          {proposal.start_date}
         </Text>
         <Text style={styles.infoText}>
-          <Text style={styles.label}>End Date:</Text> {proposal.end_date}
+          <Text style={styles.label}>Event End Date:</Text> {proposal.end_date}
         </Text>
         <Text style={styles.infoText}>
           <Text style={styles.label}>Objectives:</Text> {proposal.objectives}
@@ -82,10 +102,16 @@ const ProposalDetailsPage = () => {
           <Text style={styles.label}>Approx. Number of Attendees:</Text>{" "}
           {proposal.attendance}
         </Text>
-        <Text style={styles.infoText}>
-          <Text style={styles.label}>Remaining Tasks:</Text>{" "}
-          {proposal.tasks_remaining}
-        </Text>
+
+        <Text style={styles.tasksLabel}>Remaining Tasks:</Text>
+        <View style={styles.tasksContainer}>
+          {proposal.tasks_remaining.map((task, index) => (
+            <Text key={index} style={styles.bulletPoint}>
+              {"\u2022"} {task}
+            </Text>
+          ))}
+        </View>
+
         <Text style={styles.infoText}>
           <Text style={styles.label}>Benefits of Collaborating:</Text>{" "}
           {proposal.collab_benefits}
@@ -98,11 +124,67 @@ const ProposalDetailsPage = () => {
           {proposal.similar_events}
         </Text>
         <View style={styles.buttonContainer}>
-          <TouchableOpacity style={styles.actionButton}>
+          <TouchableOpacity
+            style={styles.actionButton}
+            onPress={() => setModalVisible(true)}
+          >
             <Text style={styles.buttonText}>Interested?</Text>
           </TouchableOpacity>
         </View>
       </ScrollView>
+
+      <Modal
+        animationType="slide"
+        transparent={true}
+        visible={modalVisible}
+        onRequestClose={() => {
+          setModalVisible(!modalVisible);
+        }}
+      >
+        <View style={styles.modalContainer}>
+          <View style={styles.modalView}>
+            <Text style={styles.modalText}>Express Your Interest</Text>
+            <TextInput
+              style={styles.input}
+              placeholder="Club Name"
+              value={clubName}
+              onChangeText={setClubName}
+            />
+            <Text style={styles.modalLabel}>
+              Which tasks is your club able to help out with?
+            </Text>
+
+            <View style={styles.tasksContainer}>
+              {proposal.tasks_remaining.map((task, index) => (
+                <CheckBox
+                  key={index}
+                  title={task}
+                  checked={checkedItems[index]}
+                  onPress={() => handleCheck(index)}
+                  containerStyle={styles.checkboxContainer}
+                  textStyle={styles.checkboxText}
+                />
+              ))}
+            </View>
+
+            <TextInput
+              style={[styles.input, styles.textArea]}
+              placeholder="Additional Information"
+              value={additionalInfo}
+              onChangeText={setAdditionalInfo}
+              multiline
+            />
+            <View style={styles.modalButtonContainer}>
+              <Button
+                title="Cancel"
+                onPress={() => setModalVisible(false)}
+                color="#FF6347"
+              />
+              <Button title="Send" onPress={handleSubmit} />
+            </View>
+          </View>
+        </View>
+      </Modal>
     </SafeAreaView>
   );
 };
@@ -188,7 +270,6 @@ const styles = StyleSheet.create({
     borderRadius: 20,
     paddingVertical: 12,
     paddingHorizontal: 25,
-    // alignSelf: "center",
     shadowColor: "#000",
     shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 0.3,
@@ -200,5 +281,104 @@ const styles = StyleSheet.create({
     color: "white",
     fontSize: 18,
     fontWeight: "bold",
+  },
+
+  tasksContainer: {
+    alignItems: "left",
+  },
+
+  tasksLabel: {
+    fontWeight: "bold",
+    color: "#212529", // Black color for emphasis
+    fontSize: 16,
+    lineHeight: 24,
+  },
+
+  tasksContainer: {
+    marginBottom: 10,
+  },
+
+  bulletPoint: {
+    fontSize: 16,
+    marginLeft: 10,
+    lineHeight: 24,
+  },
+
+  checkboxContainer: {
+    backgroundColor: "transparent",
+    borderWidth: 0,
+    margin: 0,
+    padding: 5,
+    alignItems: "left",
+  },
+
+  checkboxText: {
+    fontSize: 16,
+    fontWeight: "400",
+  },
+
+  centeredContainer: {
+    flex: 1,
+    justifyContent: "center",
+    alignItems: "center",
+  },
+
+  modalContainer: {
+    flex: 1,
+    justifyContent: "center",
+    alignItems: "center",
+    backgroundColor: "rgba(0, 0, 0, 0.5)",
+  },
+
+  modalView: {
+    width: "90%",
+    backgroundColor: "white",
+    borderRadius: 20,
+    padding: 20,
+    alignItems: "center",
+    shadowColor: "#000",
+    shadowOffset: {
+      width: 0,
+      height: 2,
+    },
+    shadowOpacity: 0.25,
+    shadowRadius: 4,
+    elevation: 5,
+    display: "flex",
+    gap: 10,
+  },
+
+  modalText: {
+    marginBottom: 15,
+    textAlign: "center",
+    fontSize: 18,
+    fontWeight: "bold",
+  },
+
+  input: {
+    height: 40,
+    borderColor: "#ccc",
+    borderWidth: 1,
+    borderRadius: 5,
+    paddingHorizontal: 10,
+    marginBottom: 10,
+    width: "100%",
+  },
+
+  textArea: {
+    height: 80,
+  },
+
+  modalLabel: {
+    fontSize: 16,
+    fontWeight: "bold",
+    marginBottom: 10,
+    alignSelf: "flex-start",
+  },
+
+  modalButtonContainer: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    width: "100%",
   },
 });

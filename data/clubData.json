@@ -1,0 +1,16 @@
+[
+  {
+    "club_name": "Stanford Students in Entertainment",
+    "club_logo": "",
+    "mission_statement": "We are a student pre-business group focused on fostering career education and connections for students interested in the entertainment industry.",
+    "leaders": [
+      { "name": "Calvin Laughlin", "role": "President", "photo": "" },
+      { "name": "William Seymour", "role": "Vice President", "photo": "" },
+      { "name": "Kendal Murray", "role": "Financial Officer", "photo": "" }
+    ],
+    "email": "ssie.stanford@gmail.com",
+    "instagram": "@ssie.stanford",
+    "website": "https://www.stanfordssie.org",
+    "join_info": "Interested in joining? Email us at ssie.stanford@gmail.com or visit our website for more information."
+  }
+]

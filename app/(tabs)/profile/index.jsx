@@ -8,15 +8,15 @@ import {
   Dimensions,
   TouchableOpacity,
   ScrollView,
-  Pressable,
+  Linking,
 } from "react-native";
 
-import { useNavigation, Link, useRouter, router } from "expo-router";
-
+import { useRouter } from "expo-router";
 import clubImage from "../../../assets/club-image.png";
 import proposals from "../../../data/ssieProposals.json";
 import Proposal from "../../../components/proposalPreview";
-
+import clubData from "../../../data/clubData.json";
+import defaultProfilePic from "../../../assets/defaultProfilePic.webp";
 const windowHeight = Dimensions.get("window").height;
 const windowWidth = Dimensions.get("window").width;
 
@@ -39,9 +39,7 @@ const HomePage = () => {
     <SafeAreaView style={styles.container}>
       <View style={styles.profileHeader}>
         <Image source={clubImage} style={styles.profilePic} />
-        <Text style={styles.profileName}>
-          Stanford Students in Entertainment
-        </Text>
+        <Text style={styles.profileName}>{clubData[0].club_name}</Text>
       </View>
       <View style={styles.tabBar}>
         <Tab
@@ -57,14 +55,57 @@ const HomePage = () => {
       </View>
       <View style={{ width: "100%", flex: 1 }}>
         {selectedTab === "ClubInfo" && (
-          <View style={styles.infoContent}>
-            <Text style={styles.contentHeader}>Email:</Text>
-            <Text style={styles.contentText}>ssie.stanford@gmail.com</Text>
-            <Text style={styles.contentHeader}>Website:</Text>
-            <Text style={styles.contentText}>ssie.stanford.edu</Text>
-            <Text style={styles.contentHeader}>Instagram:</Text>
-            <Text style={styles.contentText}>@ssie.stanford</Text>
-          </View>
+          <ScrollView
+            style={styles.infoContent}
+            showsVerticalScrollIndicator={false}
+          >
+            <Text style={styles.contentHeader}>Mission Statement:</Text>
+            <Text style={styles.contentText}>
+              {clubData[0].mission_statement}
+            </Text>
+
+            <Text style={styles.contentHeader}>Leadership:</Text>
+            <ScrollView
+              horizontal
+              showsHorizontalScrollIndicator={false}
+              contentContainerStyle={styles.leadershipContainer}
+            >
+              {clubData[0].leaders.map((leader, index) => (
+                <View key={index} style={styles.leaderCard}>
+                  <Image
+                    source={
+                      leader.image ? { uri: leader.image } : defaultProfilePic
+                    }
+                    style={styles.leaderImage}
+                  />
+                  <Text style={styles.leaderName}>{leader.name}</Text>
+                  <Text style={styles.leaderRole}>{leader.role}</Text>
+                </View>
+              ))}
+            </ScrollView>
+
+            <Text style={styles.contentHeader}>Contact Information:</Text>
+            <Text style={styles.contentText}>Email: {clubData[0].email}</Text>
+            <Text
+              style={styles.linkText}
+              onPress={() => Linking.openURL(clubData[0].website)}
+            >
+              Website: {clubData[0].website}
+            </Text>
+            <Text
+              style={styles.linkText}
+              onPress={() =>
+                Linking.openURL(
+                  `https://instagram.com/${clubData[0].instagram}`
+                )
+              }
+            >
+              Instagram: {clubData[0].instagram}
+            </Text>
+
+            <Text style={styles.contentHeader}>Join Us:</Text>
+            <Text style={styles.contentText}>{clubData[0].join_info}</Text>
+          </ScrollView>
         )}
         {selectedTab === "Proposals" && (
           <View style={{ flex: 1 }}>
@@ -196,6 +237,13 @@ const styles = StyleSheet.create({
     color: "#555",
   },
 
+  linkText: {
+    fontSize: 16,
+    marginBottom: 15,
+    color: "#1e90ff",
+    textDecorationLine: "underline",
+  },
+
   createBtnContainer: {
     marginVertical: 15,
     alignItems: "center",
@@ -215,6 +263,44 @@ const styles = StyleSheet.create({
     shadowOpacity: 0.1,
     shadowRadius: 20,
     elevation: 10,
+  },
+
+  scrollView: {
+    width: "100%",
+  },
+
+  btnText: {
+    color: "#4a4e69",
+    fontSize: 16,
+    fontWeight: "bold",
+  },
+
+  leadershipContainer: {
+    flexDirection: "row",
+    marginBottom: 20,
+  },
+
+  leaderCard: {
+    alignItems: "center",
+    marginRight: 20,
+  },
+
+  leaderImage: {
+    width: 80,
+    height: 80,
+    borderRadius: 40,
+    marginBottom: 10,
+  },
+
+  leaderName: {
+    fontSize: 16,
+    fontWeight: "bold",
+    color: "#333",
+  },
+
+  leaderRole: {
+    fontSize: 14,
+    color: "#666",
   },
 });
 
