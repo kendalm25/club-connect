@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState } from "react";
 import { StatusBar } from "expo-status-bar";
 import {
   StyleSheet,
@@ -10,11 +10,12 @@ import {
   Image,
   Alert,
   TextInput,
+  AppState,
 } from "react-native";
-import DropDownPicker from "react-native-dropdown-picker";
 import { useRouter } from "expo-router";
 import { supabase } from "../lib/supabase";
 import clubFair from "../assets/club_fair.webp";
+import { Session } from "@supabase/supabase-js";
 
 const windowWidth = Dimensions.get("window").width;
 const windowHeight = Dimensions.get("window").height;
@@ -26,105 +27,114 @@ const LoginPage = () => {
   const [signUp, setSignUp] = useState(false);
 
   const [email, setEmail] = useState("");
-  const [clubName, setClubName] = useState("");
   const [password, setPassword] = useState("");
-  const [leaderName, setLeaderName] = useState("");
-  const [leaderTitle, setLeaderTitle] = useState("");
-  const [leaders, setLeaders] = useState([]);
-  const [clubMission, setClubMission] = useState("");
-  const [clubProfilePic, setClubProfilePic] = useState("");
+  // const [clubName, setClubName] = useState("");
   const [loading, setLoading] = useState(false);
-  const [clubs, setClubs] = useState([]);
-  const [selectedClub, setSelectedClub] = useState(null);
-  const [open, setOpen] = useState(false);
-  const [items, setItems] = useState([]);
 
-  useEffect(() => {
-    fetchClubs();
-  }, []);
-
-  async function fetchClubs() {
-    const { data, error } = await supabase.from("clubs").select("name");
-    if (error) {
-      Alert.alert(error.message);
-    } else {
-      const clubItems = data.map((club) => ({
-        label: club.name,
-        value: club.name,
-      }));
-      setItems(clubItems);
-    }
-  }
-
-  async function signInWithClubName() {
+  async function signIn() {
     setLoading(true);
-    const { data, error } = await supabase
-      .from("clubs")
-      .select("email")
-      .eq("name", selectedClub)
-      .single();
+    try {
+      const { data, error } = await supabase.auth.signInWithPassword({
+        email,
+        password,
+      });
 
-    if (error) {
-      Alert.alert(error.message);
-    } else {
-      const email = data.contact_email;
-      const { data: signInData, error: signInError } =
-        await supabase.auth.signInWithPassword({
-          email,
-          password,
-        });
+      console.log("signIn data: ", data);
+      console.log("signIn error: ", error);
 
-      if (signInError) {
-        Alert.alert(signInError.message);
-      } else {
+      if (error) {
+        Alert.alert(error.message);
+      } else if (data.session) {
         Alert.alert("Login successful");
         router.push(`/(tabs)/mainFeed`);
+      } else {
+        Alert.alert("Login failed");
       }
+    } catch (error) {
+      Alert.alert("An unexpected error occurred.");
+      console.error(error);
+    } finally {
+      setLoading(false);
     }
-    setLoading(false);
   }
 
   async function signUpWithClubDetails() {
     setLoading(true);
-    const { data, error } = await supabase.auth.signUp({
-      email,
-      password,
+    try {
+      const { data, error } = await supabase.auth.signUp({
+        email,
+        password,
+      });
+
+      console.log("signUp data: ", data);
+      console.log("signUp error: ", error);
+
+      if (error) {
+        Alert.alert(error.message);
+      } else if (data.user) {
+        const userId = data.user.id;
+        const { error: insertError } = await supabase.from("clubs").insert([
+          {
+            id: userId,
+            name: clubName,
+            email: email,
+          },
+        ]);
+
+        console.log("club insert error: ", insertError);
+
+        if (insertError) {
+          Alert.alert(insertError.message);
+        } else {
+          Alert.alert("Account created successfully!");
+          router.push(`/(tabs)/mainFeed`);
+        }
+      } else {
+        Alert.alert("Sign up failed");
+      }
+    } catch (error) {
+      Alert.alert("An unexpected error occurred.");
+      console.error(error);
+    } finally {
+      setLoading(false);
+    }
+  }
+
+  async function signInWithEmail() {
+    setLoading(true);
+    const { error } = await supabase.auth.signInWithPassword({
+      email: email,
+      password: password,
     });
 
     if (error) {
       Alert.alert(error.message);
       setLoading(false);
-      return;
     } else {
-      const userId = data.user.id;
-      const newLeaders = [...leaders, { name: leaderName, title: leaderTitle }];
-      const { error: insertError } = await supabase.from("clubs").insert([
-        {
-          id: userId,
-          name: clubName,
-          contact_email: email,
-          mission: clubMission,
-          profile_picture_url: clubProfilePic,
-          leaders: newLeaders,
-        },
-      ]);
-
-      if (insertError) {
-        Alert.alert(insertError.message);
-      } else {
-        Alert.alert("Account created successfully!");
-        router.push(`/(tabs)/mainFeed`);
-      }
+      Alert.alert("Login successful");
+      router.push(`/(tabs)/mainFeed`);
     }
-
-    setLoading(false);
   }
 
-  const addLeader = () => {
-    setLeaders([...leaders, { name: leaderName, title: leaderTitle }]);
-    setLeaderName("");
-    setLeaderTitle("");
-  };
+  async function signUpWithEmail() {
+    setLoading(true);
+    const {
+      data: { session },
+      error,
+    } = await supabase.auth.signUp({
+      email: email,
+      password: password,
+    });
+
+    if (error) {
+      Alert.alert(error.message);
+    } else if (!session) {
+      Alert.alert("Please check your inbox for email verification!");
+    } else {
+      router.push(`/(tabs)/mainFeed`);
+    }
+    setLoading(false);
+  }
 
   const showLogIn = () => {
     setLogIn(true);
@@ -138,11 +148,7 @@ const LoginPage = () => {
     setWelcome(false);
     setSignUp(true);
     setEmail("");
-    setClubName("");
     setPassword("");
-    setLeaderName("");
-    setLeaderTitle("");
-    setClubMission("");
   };
 
   const showWelcome = () => {
@@ -172,43 +178,6 @@ const LoginPage = () => {
       <SafeAreaView style={styles.container}>
         <View style={styles.content}>
           <Text style={styles.header}>Log In</Text>
-          <DropDownPicker
-            open={open}
-            value={selectedClub}
-            items={items}
-            setOpen={setOpen}
-            setValue={setSelectedClub}
-            setItems={setItems}
-            placeholder="Select your club"
-            containerStyle={{ width: windowWidth * 0.8, marginBottom: 10 }}
-          />
-          <TextInput
-            style={styles.input}
-            placeholder="Password"
-            value={password}
-            onChangeText={setPassword}
-            secureTextEntry
-          />
-          <TouchableOpacity style={styles.button} onPress={signInWithClubName}>
-            <Text style={styles.btnText}>Log In</Text>
-          </TouchableOpacity>
-          <TouchableOpacity style={styles.button} onPress={showWelcome}>
-            <Text style={styles.btnText}>Back</Text>
-          </TouchableOpacity>
-        </View>
-      </SafeAreaView>
-    );
-  } else if (signUp) {
-    return (
-      <SafeAreaView style={styles.container}>
-        <View style={styles.content}>
-          <Text style={styles.header}>Sign Up</Text>
-          <TextInput
-            style={styles.input}
-            placeholder="Club Name"
-            value={clubName}
-            onChangeText={setClubName}
-          />
           <TextInput
             style={styles.input}
             placeholder="Email"
@@ -222,38 +191,40 @@ const LoginPage = () => {
             onChangeText={setPassword}
             secureTextEntry
           />
-          <TextInput
-            style={styles.input}
-            placeholder="Mission Statement"
-            value={clubMission}
-            onChangeText={setClubMission}
-          />
-          <TextInput
-            style={styles.input}
-            placeholder="Profile Picture URL"
-            value={clubProfilePic}
-            onChangeText={setClubProfilePic}
-          />
-          <TextInput
-            style={styles.input}
-            placeholder="Leader Name"
-            value={leaderName}
-            onChangeText={setLeaderName}
-          />
-          <TextInput
-            style={styles.input}
-            placeholder="Leader Title"
-            value={leaderTitle}
-            onChangeText={setLeaderTitle}
-          />
-          <TouchableOpacity style={styles.button} onPress={addLeader}>
-            <Text style={styles.btnText}>Add Leader</Text>
+          <TouchableOpacity style={styles.button} onPress={signInWithEmail}>
+            <Text style={styles.btnText}>Log In</Text>
           </TouchableOpacity>
-
-          <TouchableOpacity
-            style={styles.button}
-            onPress={signUpWithClubDetails}
-          >
+          <TouchableOpacity style={styles.button} onPress={showWelcome}>
+            <Text style={styles.btnText}>Back</Text>
+          </TouchableOpacity>
+        </View>
+      </SafeAreaView>
+    );
+  } else if (signUp) {
+    return (
+      <SafeAreaView style={styles.container}>
+        <View style={styles.content}>
+          <Text style={styles.header}>Sign Up</Text>
+          {/* <TextInput
+            style={styles.input}
+            placeholder="Club Name"
+            value={clubName}
+            onChangeText={setClubName}
+          /> */}
+          <TextInput
+            style={styles.input}
+            placeholder="Club Email"
+            value={email}
+            onChangeText={setEmail}
+          />
+          <TextInput
+            style={styles.input}
+            placeholder="Password"
+            value={password}
+            onChangeText={setPassword}
+            secureTextEntry
+          />
+          <TouchableOpacity style={styles.button} onPress={signUpWithEmail}>
             <Text style={styles.btnText}>Create Account</Text>
           </TouchableOpacity>
           <TouchableOpacity style={styles.button} onPress={showWelcome}>
