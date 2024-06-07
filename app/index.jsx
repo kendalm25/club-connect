@@ -51,7 +51,6 @@ const LoginPage = () => {
       setLoading(false);
     } else {
       const sessionStr = encodeURIComponent(JSON.stringify(session));
-      console.log("sessionStr: ", sessionStr);
       router.push(`/(tabs)/profile?session=${sessionStr}`);
     }
   }
@@ -72,7 +71,6 @@ const LoginPage = () => {
       Alert.alert("There is no session");
     } else {
       const sessionStr = encodeURIComponent(JSON.stringify(session));
-      console.log("sessionStr: ", sessionStr);
       router.push(`/(tabs)/profile?session=${sessionStr}`);
     }
     setLoading(false);

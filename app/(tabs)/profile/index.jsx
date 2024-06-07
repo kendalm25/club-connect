@@ -10,6 +10,8 @@ import {
   ScrollView,
   Alert,
   ActivityIndicator,
+  TextInput,
+  Linking,
 } from "react-native";
 import { useRouter, useLocalSearchParams } from "expo-router";
 import clubImage from "../../../assets/club-image.png";
@@ -42,11 +44,10 @@ export default function ProfilePage() {
   const [website, setWebsite] = useState("");
   const [clubProfilePic, setClubProfilePic] = useState("");
   const [selectedTab, setSelectedTab] = useState("ClubInfo");
+  const [editMode, setEditMode] = useState(false);
 
   useEffect(() => {
-    console.log("session string");
     if (sessionStr) {
-      console.log("session string is: ", sessionStr);
       const sessionData = JSON.parse(decodeURIComponent(sessionStr));
       setSession(sessionData);
       setLoading(false);
@@ -120,6 +121,7 @@ export default function ProfilePage() {
         Alert.alert(error.message);
       }
     } finally {
+      setEditMode(false);
       setLoading(false);
     }
   }
@@ -135,25 +137,73 @@ export default function ProfilePage() {
   return (
     <SafeAreaView style={styles.container}>
       <View style={styles.profileHeader}>
-        <Image
-          source={clubProfilePic ? { uri: clubProfilePic } : clubImage}
-          style={styles.profilePic}
-        />
-        <Text style={styles.profileName}>{clubName}</Text>
-        <TouchableOpacity
-          onPress={() =>
-            updateProfile({
-              username: clubName,
-              website,
-              avatar_url: clubProfilePic,
-              mission,
-              contact_email: email,
-            })
-          }
-          disabled={loading}
-        >
-          <Text>Update Profile</Text>
-        </TouchableOpacity>
+        <View style={styles.picAndClubContainer}>
+          <Image
+            source={
+              clubProfilePic ? { uri: clubProfilePic } : defaultProfilePic
+            }
+            style={styles.profilePic}
+          />
+          <Text style={styles.profileName}>{clubName}</Text>
+        </View>
+        {editMode ? (
+          <>
+            <TextInput
+              style={styles.input}
+              value={clubName}
+              onChangeText={setClubName}
+              placeholder="Club Name"
+            />
+            <TextInput
+              style={styles.input}
+              value={clubProfilePic}
+              onChangeText={setClubProfilePic}
+              placeholder="Image URL"
+            />
+            <TextInput
+              style={styles.input}
+              value={mission}
+              onChangeText={setMission}
+              placeholder="Mission Statement"
+            />
+            <TextInput
+              style={styles.input}
+              value={website}
+              onChangeText={setWebsite}
+              placeholder="Website"
+            />
+            <TouchableOpacity
+              onPress={() =>
+                updateProfile({
+                  username: clubName,
+                  website,
+                  avatar_url: clubProfilePic,
+                  mission,
+                  contact_email: email,
+                })
+              }
+              disabled={loading}
+              style={styles.updateBtn}
+            >
+              <Text>Save Changes</Text>
+            </TouchableOpacity>
+            <TouchableOpacity
+              onPress={() => setEditMode(!editMode)}
+              style={styles.updateBtn}
+            >
+              <Text>Cancel</Text>
+            </TouchableOpacity>
+          </>
+        ) : (
+          <>
+            <TouchableOpacity
+              onPress={() => setEditMode(!editMode)}
+              style={styles.updateBtn}
+            >
+              <Text>Update Profile</Text>
+            </TouchableOpacity>
+          </>
+        )}
       </View>
       <View style={styles.tabBar}>
         <Tab
@@ -179,8 +229,19 @@ export default function ProfilePage() {
             <Text style={styles.contentText}>
               Email: {session?.user?.email}
             </Text>
-            <Text style={styles.contentText}>Website: {website}</Text>
-            <TouchableOpacity onPress={() => supabase.auth.signOut()}>
+            <Text style={styles.contentText}>
+              Website:{" "}
+              <Text
+                style={{ color: "blue" }}
+                onPress={() => Linking.openURL(website)}
+              >
+                {website}
+              </Text>
+            </Text>
+            <TouchableOpacity
+              onPress={() => supabase.auth.signOut()}
+              style={styles.updateBtn}
+            >
               <Text>Sign Out</Text>
             </TouchableOpacity>
           </ScrollView>
@@ -248,6 +309,11 @@ const styles = StyleSheet.create({
     marginBottom: 10,
   },
 
+  picAndClubContainer: {
+    alignItems: "center",
+    paddingBottom: 20,
+  },
+
   profilePic: {
     width: 120,
     height: 120,
@@ -259,6 +325,15 @@ const styles = StyleSheet.create({
     fontSize: 22,
     fontWeight: "bold",
     color: "#333",
+  },
+
+  input: {
+    width: "80%",
+    padding: 10,
+    borderColor: "#ccc",
+    borderWidth: 1,
+    borderRadius: 5,
+    marginBottom: 10,
   },
 
   tabBar: {
@@ -335,6 +410,24 @@ const styles = StyleSheet.create({
   },
 
   createBtn: {
+    borderRadius: 10,
+    padding: 10,
+    alignItems: "center",
+    width: "80%",
+    backgroundColor: "white",
+    shadowColor: "#000",
+    shadowOffset: {
+      width: 0,
+      height: 10,
+    },
+    shadowOpacity: 0.1,
+    shadowRadius: 20,
+    elevation: 10,
+  },
+
+  updateBtn: {
+    borderColor: "#4a4e69",
+    borderWidth: 2,
     borderRadius: 10,
     padding: 10,
     alignItems: "center",
