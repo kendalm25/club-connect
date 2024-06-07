@@ -126,6 +126,22 @@ export default function ProfilePage() {
     }
   }
 
+  async function handleSignOut() {
+    try {
+      const { error } = await supabase.auth.signOut();
+      if (error) {
+        throw error;
+      }
+      // Clear session and navigate to login or home page
+      setSession(null);
+      router.replace("/"); // Adjust the route to your login or home page
+    } catch (error) {
+      if (error instanceof Error) {
+        Alert.alert("Sign Out Error", error.message);
+      }
+    }
+  }
+
   if (loading) {
     return (
       <View style={styles.loadingContainer}>
@@ -238,10 +254,7 @@ export default function ProfilePage() {
                 {website}
               </Text>
             </Text>
-            <TouchableOpacity
-              onPress={() => supabase.auth.signOut()}
-              style={styles.updateBtn}
-            >
+            <TouchableOpacity onPress={handleSignOut} style={styles.updateBtn}>
               <Text>Sign Out</Text>
             </TouchableOpacity>
           </ScrollView>
