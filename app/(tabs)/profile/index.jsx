@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import {
   View,
   Text,
@@ -8,15 +8,15 @@ import {
   Dimensions,
   TouchableOpacity,
   ScrollView,
-  Linking,
+  Alert,
+  ActivityIndicator,
 } from "react-native";
-
 import { useRouter } from "expo-router";
 import clubImage from "../../../assets/club-image.png";
-import proposals from "../../../data/ssieProposals.json";
 import Proposal from "../../../components/proposalPreview";
-import clubData from "../../../data/clubData.json";
 import defaultProfilePic from "../../../assets/defaultProfilePic.webp";
+import { supabase } from "../../../lib/supabase";
+
 const windowHeight = Dimensions.get("window").height;
 const windowWidth = Dimensions.get("window").width;
 
@@ -32,14 +32,70 @@ const Tab = ({ title, isSelected, onPress }) => (
 );
 
 const HomePage = () => {
-  const [selectedTab, setSelectedTab] = useState("ClubInfo");
   const router = useRouter();
+  const [loading, setLoading] = useState(true);
+  const [clubName, setClubName] = useState("");
+  const [email, setEmail] = useState("");
+  const [mission, setMission] = useState("");
+  const [clubProfilePic, setClubProfilePic] = useState("");
+  const [leaders, setLeaders] = useState([]);
+  const [selectedTab, setSelectedTab] = useState("ClubInfo");
+
+  useEffect(() => {
+    getProfileData();
+  }, []);
+
+  async function getProfileData() {
+    console.log("beginning of function");
+    try {
+      setLoading(true);
+      const {
+        data: { session },
+      } = await supabase.auth.getSession();
+      if (!session?.user) throw new Error("No user on the session!");
+
+      const { data, error, status } = await supabase
+        .from("clubs")
+        .select(`name, contact_email, mission, profile_picture_url, leaders`)
+        .eq("id", session.user.id)
+        .single();
+
+      console.log("data: ", data);
+      if (error && status !== 406) {
+        throw error;
+      }
+
+      if (data) {
+        console.log("data being collected: ", data);
+        setClubName(data.name);
+        setEmail(data.contact_email);
+        setMission(data.mission);
+        setClubProfilePic(data.profile_picture_url);
+        setLeaders(data.leaders);
+      }
+    } catch (error) {
+      Alert.alert(error.message);
+    } finally {
+      setLoading(false);
+    }
+  }
+
+  if (loading) {
+    return (
+      <View style={styles.loadingContainer}>
+        <ActivityIndicator size="large" color="#4a4e69" />
+      </View>
+    );
+  }
 
   return (
     <SafeAreaView style={styles.container}>
       <View style={styles.profileHeader}>
-        <Image source={clubImage} style={styles.profilePic} />
-        <Text style={styles.profileName}>{clubData[0].club_name}</Text>
+        <Image
+          source={clubProfilePic ? { uri: clubProfilePic } : clubImage}
+          style={styles.profilePic}
+        />
+        <Text style={styles.profileName}>{clubName}</Text>
       </View>
       <View style={styles.tabBar}>
         <Tab
@@ -60,9 +116,7 @@ const HomePage = () => {
             showsVerticalScrollIndicator={false}
           >
             <Text style={styles.contentHeader}>Mission Statement:</Text>
-            <Text style={styles.contentText}>
-              {clubData[0].mission_statement}
-            </Text>
+            <Text style={styles.contentText}>{mission}</Text>
 
             <Text style={styles.contentHeader}>Leadership:</Text>
             <ScrollView
@@ -70,7 +124,7 @@ const HomePage = () => {
               showsHorizontalScrollIndicator={false}
               contentContainerStyle={styles.leadershipContainer}
             >
-              {clubData[0].leaders.map((leader, index) => (
+              {leaders.map((leader, index) => (
                 <View key={index} style={styles.leaderCard}>
                   <Image
                     source={
@@ -85,26 +139,7 @@ const HomePage = () => {
             </ScrollView>
 
             <Text style={styles.contentHeader}>Contact Information:</Text>
-            <Text style={styles.contentText}>Email: {clubData[0].email}</Text>
-            <Text
-              style={styles.linkText}
-              onPress={() => Linking.openURL(clubData[0].website)}
-            >
-              Website: {clubData[0].website}
-            </Text>
-            <Text
-              style={styles.linkText}
-              onPress={() =>
-                Linking.openURL(
-                  `https://instagram.com/${clubData[0].instagram}`
-                )
-              }
-            >
-              Instagram: {clubData[0].instagram}
-            </Text>
-
-            <Text style={styles.contentHeader}>Join Us:</Text>
-            <Text style={styles.contentText}>{clubData[0].join_info}</Text>
+            <Text style={styles.contentText}>Email: {email}</Text>
           </ScrollView>
         )}
         {selectedTab === "Proposals" && (
@@ -147,6 +182,13 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     alignItems: "center",
+    backgroundColor: "#f0f0f0",
+  },
+
+  loadingContainer: {
+    flex: 1,
+    alignItems: "center",
+    justifyContent: "center",
     backgroundColor: "#f0f0f0",
   },
 
@@ -278,6 +320,11 @@ const styles = StyleSheet.create({
   leadershipContainer: {
     flexDirection: "row",
     marginBottom: 20,
+  },
+
+  leaderCard: {
+    alignItems: "center",
+    marginRight: 20,
   },
 
   leaderCard: {
