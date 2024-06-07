@@ -11,7 +11,7 @@ import {
   Alert,
   ActivityIndicator,
 } from "react-native";
-import { useRouter } from "expo-router";
+import { useRouter, useLocalSearchParams } from "expo-router";
 import clubImage from "../../../assets/club-image.png";
 import Proposal from "../../../components/proposalPreview";
 import defaultProfilePic from "../../../assets/defaultProfilePic.webp";
@@ -31,50 +31,94 @@ const Tab = ({ title, isSelected, onPress }) => (
   </TouchableOpacity>
 );
 
-const HomePage = () => {
+export default function ProfilePage() {
   const router = useRouter();
+  const { session: sessionStr } = useLocalSearchParams();
+  const [session, setSession] = useState(null);
   const [loading, setLoading] = useState(true);
   const [clubName, setClubName] = useState("");
   const [email, setEmail] = useState("");
   const [mission, setMission] = useState("");
+  const [website, setWebsite] = useState("");
   const [clubProfilePic, setClubProfilePic] = useState("");
-  const [leaders, setLeaders] = useState([]);
   const [selectedTab, setSelectedTab] = useState("ClubInfo");
 
   useEffect(() => {
-    getProfileData();
-  }, []);
+    console.log("session string");
+    if (sessionStr) {
+      console.log("session string is: ", sessionStr);
+      const sessionData = JSON.parse(decodeURIComponent(sessionStr));
+      setSession(sessionData);
+      setLoading(false);
+    }
+  }, [sessionStr]);
 
-  async function getProfileData() {
-    console.log("beginning of function");
+  useEffect(() => {
+    if (session) {
+      getProfile();
+      setLoading(false);
+    }
+  }, [session]);
+
+  async function getProfile() {
     try {
       setLoading(true);
-      const {
-        data: { session },
-      } = await supabase.auth.getSession();
       if (!session?.user) throw new Error("No user on the session!");
 
       const { data, error, status } = await supabase
-        .from("clubs")
-        .select(`name, contact_email, mission, profile_picture_url, leaders`)
-        .eq("id", session.user.id)
+        .from("profiles")
+        .select("username, website, avatar_url, mission, contact_email")
+        .eq("id", session?.user.id)
         .single();
-
-      console.log("data: ", data);
       if (error && status !== 406) {
         throw error;
       }
 
       if (data) {
-        console.log("data being collected: ", data);
-        setClubName(data.name);
-        setEmail(data.contact_email);
+        setClubName(data.username);
         setMission(data.mission);
-        setClubProfilePic(data.profile_picture_url);
-        setLeaders(data.leaders);
+        setEmail(data.contact_email);
+        setWebsite(data.website);
+        setClubProfilePic(data.avatar_url);
       }
     } catch (error) {
-      Alert.alert(error.message);
+      if (error instanceof Error) {
+        Alert.alert(error.message);
+      }
+    }
+    setLoading(false);
+  }
+
+  async function updateProfile({
+    username,
+    website,
+    avatar_url,
+    mission,
+    contact_email,
+  }) {
+    try {
+      setLoading(true);
+      if (!session?.user) throw new Error("No user on the session!");
+
+      const updates = {
+        id: session?.user.id,
+        username,
+        website,
+        avatar_url,
+        mission,
+        contact_email,
+        updated_at: new Date(),
+      };
+
+      const { error } = await supabase.from("profiles").upsert(updates);
+
+      if (error) {
+        throw error;
+      }
+    } catch (error) {
+      if (error instanceof Error) {
+        Alert.alert(error.message);
+      }
     } finally {
       setLoading(false);
     }
@@ -96,6 +140,20 @@ const HomePage = () => {
           style={styles.profilePic}
         />
         <Text style={styles.profileName}>{clubName}</Text>
+        <TouchableOpacity
+          onPress={() =>
+            updateProfile({
+              username: clubName,
+              website,
+              avatar_url: clubProfilePic,
+              mission,
+              contact_email: email,
+            })
+          }
+          disabled={loading}
+        >
+          <Text>Update Profile</Text>
+        </TouchableOpacity>
       </View>
       <View style={styles.tabBar}>
         <Tab
@@ -117,29 +175,14 @@ const HomePage = () => {
           >
             <Text style={styles.contentHeader}>Mission Statement:</Text>
             <Text style={styles.contentText}>{mission}</Text>
-
-            <Text style={styles.contentHeader}>Leadership:</Text>
-            <ScrollView
-              horizontal
-              showsHorizontalScrollIndicator={false}
-              contentContainerStyle={styles.leadershipContainer}
-            >
-              {leaders.map((leader, index) => (
-                <View key={index} style={styles.leaderCard}>
-                  <Image
-                    source={
-                      leader.image ? { uri: leader.image } : defaultProfilePic
-                    }
-                    style={styles.leaderImage}
-                  />
-                  <Text style={styles.leaderName}>{leader.name}</Text>
-                  <Text style={styles.leaderRole}>{leader.role}</Text>
-                </View>
-              ))}
-            </ScrollView>
-
             <Text style={styles.contentHeader}>Contact Information:</Text>
-            <Text style={styles.contentText}>Email: {email}</Text>
+            <Text style={styles.contentText}>
+              Email: {session?.user?.email}
+            </Text>
+            <Text style={styles.contentText}>Website: {website}</Text>
+            <TouchableOpacity onPress={() => supabase.auth.signOut()}>
+              <Text>Sign Out</Text>
+            </TouchableOpacity>
           </ScrollView>
         )}
         {selectedTab === "Proposals" && (
@@ -176,7 +219,7 @@ const HomePage = () => {
       </View>
     </SafeAreaView>
   );
-};
+}
 
 const styles = StyleSheet.create({
   container: {
@@ -327,11 +370,6 @@ const styles = StyleSheet.create({
     marginRight: 20,
   },
 
-  leaderCard: {
-    alignItems: "center",
-    marginRight: 20,
-  },
-
   leaderImage: {
     width: 80,
     height: 80,
@@ -350,5 +388,3 @@ const styles = StyleSheet.create({
     color: "#666",
   },
 });
-
-export default HomePage;

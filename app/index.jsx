@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { StatusBar } from "expo-status-bar";
 import {
   StyleSheet,
@@ -10,17 +10,16 @@ import {
   Image,
   Alert,
   TextInput,
-  AppState,
 } from "react-native";
 import { useRouter } from "expo-router";
 import { supabase } from "../lib/supabase";
 import clubFair from "../assets/club_fair.webp";
-import { Session } from "@supabase/supabase-js";
 
 const windowWidth = Dimensions.get("window").width;
 const windowHeight = Dimensions.get("window").height;
 
 const LoginPage = () => {
+  const [session, setSession] = useState(null);
   const router = useRouter();
   const [welcome, setWelcome] = useState(true);
   const [logIn, setLogIn] = useState(false);
@@ -28,77 +27,17 @@ const LoginPage = () => {
 
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
-  // const [clubName, setClubName] = useState("");
   const [loading, setLoading] = useState(false);
 
-  async function signIn() {
-    setLoading(true);
-    try {
-      const { data, error } = await supabase.auth.signInWithPassword({
-        email,
-        password,
-      });
+  useEffect(() => {
+    supabase.auth.getSession().then(({ data: { session } }) => {
+      setSession(session);
+    });
 
-      console.log("signIn data: ", data);
-      console.log("signIn error: ", error);
-
-      if (error) {
-        Alert.alert(error.message);
-      } else if (data.session) {
-        Alert.alert("Login successful");
-        router.push(`/(tabs)/mainFeed`);
-      } else {
-        Alert.alert("Login failed");
-      }
-    } catch (error) {
-      Alert.alert("An unexpected error occurred.");
-      console.error(error);
-    } finally {
-      setLoading(false);
-    }
-  }
-
-  async function signUpWithClubDetails() {
-    setLoading(true);
-    try {
-      const { data, error } = await supabase.auth.signUp({
-        email,
-        password,
-      });
-
-      console.log("signUp data: ", data);
-      console.log("signUp error: ", error);
-
-      if (error) {
-        Alert.alert(error.message);
-      } else if (data.user) {
-        const userId = data.user.id;
-        const { error: insertError } = await supabase.from("clubs").insert([
-          {
-            id: userId,
-            name: clubName,
-            email: email,
-          },
-        ]);
-
-        console.log("club insert error: ", insertError);
-
-        if (insertError) {
-          Alert.alert(insertError.message);
-        } else {
-          Alert.alert("Account created successfully!");
-          router.push(`/(tabs)/mainFeed`);
-        }
-      } else {
-        Alert.alert("Sign up failed");
-      }
-    } catch (error) {
-      Alert.alert("An unexpected error occurred.");
-      console.error(error);
-    } finally {
-      setLoading(false);
-    }
-  }
+    supabase.auth.onAuthStateChange((_event, session) => {
+      setSession(session);
+    });
+  }, []);
 
   async function signInWithEmail() {
     setLoading(true);
@@ -111,8 +50,9 @@ const LoginPage = () => {
       Alert.alert(error.message);
       setLoading(false);
     } else {
-      Alert.alert("Login successful");
-      router.push(`/(tabs)/mainFeed`);
+      const sessionStr = encodeURIComponent(JSON.stringify(session));
+      console.log("sessionStr: ", sessionStr);
+      router.push(`/(tabs)/profile?session=${sessionStr}`);
     }
   }
 
@@ -129,9 +69,11 @@ const LoginPage = () => {
     if (error) {
       Alert.alert(error.message);
     } else if (!session) {
-      Alert.alert("Please check your inbox for email verification!");
+      Alert.alert("There is no session");
     } else {
-      router.push(`/(tabs)/mainFeed`);
+      const sessionStr = encodeURIComponent(JSON.stringify(session));
+      console.log("sessionStr: ", sessionStr);
+      router.push(`/(tabs)/profile?session=${sessionStr}`);
     }
     setLoading(false);
   }
@@ -205,12 +147,6 @@ const LoginPage = () => {
       <SafeAreaView style={styles.container}>
         <View style={styles.content}>
           <Text style={styles.header}>Sign Up</Text>
-          {/* <TextInput
-            style={styles.input}
-            placeholder="Club Name"
-            value={clubName}
-            onChangeText={setClubName}
-          /> */}
           <TextInput
             style={styles.input}
             placeholder="Club Email"
