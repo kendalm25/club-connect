@@ -60,6 +60,7 @@ export default function ProfilePage() {
       getProfile();
       fetchProposals();
       setLoading(false);
+      setEmail(session?.user?.email);
     }
   }, [session]);
 
@@ -80,7 +81,7 @@ export default function ProfilePage() {
       if (data) {
         setClubName(data.username);
         setMission(data.mission);
-        setEmail(data.contact_email);
+        setEmail(session?.user?.email);
         setWebsite(data.website);
         setClubProfilePic(data.avatar_url);
       }
@@ -206,6 +207,12 @@ export default function ProfilePage() {
               value={clubProfilePic}
               onChangeText={setClubProfilePic}
               placeholder="Image URL"
+            />
+            <TextInput
+              style={styles.input}
+              value={email}
+              onChangeText={setEmail}
+              placeholder="Club Email"
             />
             <TextInput
               style={styles.input}
