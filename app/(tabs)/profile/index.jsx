@@ -18,6 +18,7 @@ import clubImage from "../../../assets/club-image.png";
 import Proposal from "../../../components/proposalPreview";
 import defaultProfilePic from "../../../assets/defaultProfilePic.webp";
 import { supabase } from "../../../lib/supabase";
+import Ionicons from "@expo/vector-icons/Ionicons";
 
 const windowHeight = Dimensions.get("window").height;
 const windowWidth = Dimensions.get("window").width;
@@ -104,6 +105,7 @@ export default function ProfilePage() {
         .order("created_at", { ascending: false });
 
       if (error) {
+        console.error("Error fetching proposals:", error);
         throw error;
       }
 
@@ -301,7 +303,13 @@ export default function ProfilePage() {
                 style={styles.createBtn}
                 onPress={handleGoToCreatePage}
               >
-                <Text style={styles.btnText}>+ Create New Proposal</Text>
+                <Text style={styles.btnText}> Create New Proposal</Text>
+              </TouchableOpacity>
+              <TouchableOpacity
+                style={styles.createBtn}
+                onPress={() => fetchProposals()}
+              >
+                <Ionicons name="refresh" size={20} color="#4a4e69" />
               </TouchableOpacity>
             </View>
             <ScrollView
@@ -456,13 +464,18 @@ const styles = StyleSheet.create({
   createBtnContainer: {
     marginVertical: 15,
     alignItems: "center",
+    flexDirection: "row",
+    justifyContent: "center",
+    gap: 20,
+    // flex: 1,
   },
 
   createBtn: {
     borderRadius: 10,
+    // height: 50,
     padding: 10,
     alignItems: "center",
-    width: "80%",
+    // width: "80%",
     backgroundColor: "white",
     shadowColor: "#000",
     shadowOffset: {

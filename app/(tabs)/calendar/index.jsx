@@ -7,9 +7,11 @@ import {
   Text,
   FlatList,
   Alert,
+  TouchableOpacity,
 } from "react-native";
 import { Calendar } from "react-native-calendars";
 import { supabase } from "../../../lib/supabase";
+import Ionicons from "@expo/vector-icons/Ionicons";
 
 const windowWidth = Dimensions.get("window").width;
 
@@ -123,7 +125,12 @@ const App = () => {
   return (
     <SafeAreaView style={styles.container}>
       <View style={styles.header}>
+        <View></View>
         <Text style={styles.headerText}>Calendar</Text>
+
+        <TouchableOpacity onPress={() => fetchProposalsAndProfiles()}>
+          <Ionicons name="refresh" size={24} color="#4a4e69" />
+        </TouchableOpacity>
       </View>
 
       <Calendar
@@ -188,11 +195,13 @@ const styles = StyleSheet.create({
     backgroundColor: "#ffffff",
     width: "100%",
     alignItems: "center",
+    justifyContent: "space-between",
     shadowColor: "#000",
     shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 0.1,
     shadowRadius: 3,
     elevation: 4,
+    flexDirection: "row",
   },
   headerText: {
     fontSize: 24,

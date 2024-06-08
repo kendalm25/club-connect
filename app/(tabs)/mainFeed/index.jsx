@@ -15,6 +15,7 @@ import Modal from "react-native-modal";
 import { useRouter } from "expo-router";
 import { supabase } from "../../../lib/supabase";
 import Proposal from "../../../components/proposalPreview";
+import Ionicons from "@expo/vector-icons/Ionicons";
 
 export default function HomePage() {
   const router = useRouter();
@@ -87,10 +88,17 @@ export default function HomePage() {
   return (
     <SafeAreaView style={styles.container}>
       <View style={styles.header}>
-        <View></View>
-        <Text style={styles.headerText}>ClubConnect</Text>
         <TouchableOpacity onPress={() => setModalVisible(true)}>
-          <Text style={styles.infoButton}>i</Text>
+          <Ionicons
+            name="information-circle-outline"
+            size={27}
+            color="#4a4e69"
+          />
+        </TouchableOpacity>
+        <Text style={styles.headerText}>ClubConnect</Text>
+
+        <TouchableOpacity onPress={() => fetchProposals()}>
+          <Ionicons name="refresh" size={24} color="#4a4e69" />
         </TouchableOpacity>
       </View>
 
@@ -117,18 +125,10 @@ export default function HomePage() {
         )}
       </ScrollView>
 
-      {/* <Modal
-        animationType="slide"
-        transparent={true}
-        visible={modalVisible}
-        onRequestClose={() => {
-          setModalVisible(!modalVisible);
-        }}
-      > */}
       <Modal
         isVisible={modalVisible}
-        animationIn="slideInRight"
-        animationOut="slideOutRight"
+        animationIn="slideInLeft"
+        animationOut="slideOutLeft"
       >
         <View style={styles.modalContainer}>
           <View style={styles.modalView}>
