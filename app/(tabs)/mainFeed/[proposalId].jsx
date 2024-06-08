@@ -21,33 +21,54 @@ const windowHeight = Dimensions.get("window").height;
 
 const ProposalDetailsPage = () => {
   const { proposalId } = useLocalSearchParams();
-  const numericProposalId = parseInt(proposalId, 10);
   const [proposal, setProposal] = useState(null);
+  const [clubName, setClubName] = useState("");
   const [checkedItems, setCheckedItems] = useState([]);
   const [modalVisible, setModalVisible] = useState(false);
-  const [clubName, setClubName] = useState("");
   const [additionalInfo, setAdditionalInfo] = useState("");
 
   useEffect(() => {
-    fetchProposal();
+    console.log("Fetching proposal with ID:", proposalId);
+    fetchProposal(proposalId);
   }, [proposalId]);
 
-  const fetchProposal = async () => {
+  const fetchProposal = async (id) => {
     try {
       const { data, error } = await supabase
         .from("proposals")
         .select("*")
-        .eq("id", numericProposalId)
+        .eq("id", id)
         .single();
 
       if (error) {
+        console.error("Error fetching proposal:", error);
         throw error;
       }
 
       setProposal(data);
-      setCheckedItems(data.tasks_remaining.map(() => false));
+      setCheckedItems((data.tasks_remaining || []).map(() => false));
+      fetchClubName(data.club_id);
     } catch (error) {
       Alert.alert("Error fetching proposal", error.message);
+    }
+  };
+
+  const fetchClubName = async (clubId) => {
+    try {
+      const { data, error } = await supabase
+        .from("profiles")
+        .select("username")
+        .eq("id", clubId)
+        .single();
+
+      if (error) {
+        console.error("Error fetching club name:", error);
+        throw error;
+      }
+
+      setClubName(data.username);
+    } catch (error) {
+      Alert.alert("Error fetching club name", error.message);
     }
   };
 
@@ -82,68 +103,94 @@ const ProposalDetailsPage = () => {
         <View style={styles.header}>
           <Text style={styles.title}>{proposal.title}</Text>
 
-          <Text style={styles.club}>
-            <Text style={styles.label}>Proposed By:</Text> {proposal.club}
-          </Text>
-          <View style={styles.typeContainer}>
-            {proposal.types.map((t, index) => (
-              <Text
-                key={index}
-                style={[
-                  styles.type,
-                  { backgroundColor: eventTypes[t] || "#fff" },
-                ]}
-              >
-                {t}
-              </Text>
-            ))}
-          </View>
-        </View>
-        <Text style={styles.infoText}>
-          <Text style={styles.label}>Overview:</Text> {proposal.overview}
-        </Text>
-        <Text style={styles.infoText}>
-          <Text style={styles.label}>Event Start Date:</Text>{" "}
-          {proposal.start_date}
-        </Text>
-        <Text style={styles.infoText}>
-          <Text style={styles.label}>Event End Date:</Text> {proposal.end_date}
-        </Text>
-        <Text style={styles.infoText}>
-          <Text style={styles.label}>Objectives:</Text> {proposal.objectives}
-        </Text>
-        <Text style={styles.infoText}>
-          <Text style={styles.label}>Audience:</Text> {proposal.audience}
-        </Text>
-
-        <Text style={styles.infoText}>
-          <Text style={styles.label}>Venue:</Text> {proposal.venue}
-        </Text>
-        <Text style={styles.infoText}>
-          <Text style={styles.label}>Approx. Number of Attendees:</Text>{" "}
-          {proposal.attendance}
-        </Text>
-
-        <Text style={styles.tasksLabel}>Remaining Tasks:</Text>
-        <View style={styles.tasksContainer}>
-          {proposal.tasks_remaining.map((task, index) => (
-            <Text key={index} style={styles.bulletPoint}>
-              {"\u2022"} {task}
+          {clubName && (
+            <Text style={styles.club}>
+              <Text style={styles.label}>Proposed By:</Text> {clubName}
             </Text>
-          ))}
+          )}
+          {proposal.types && (
+            <View style={styles.typeContainer}>
+              {proposal.types.map((t, index) => (
+                <Text
+                  key={index}
+                  style={[
+                    styles.type,
+                    { backgroundColor: eventTypes[t] || "#fff" },
+                  ]}
+                >
+                  {t}
+                </Text>
+              ))}
+            </View>
+          )}
         </View>
-
-        <Text style={styles.infoText}>
-          <Text style={styles.label}>Benefits of Collaborating:</Text>{" "}
-          {proposal.collab_benefits}
-        </Text>
-        <Text style={styles.infoText}>
-          <Text style={styles.label}>Approx. Budget:</Text> {proposal.budget}
-        </Text>
-        <Text style={styles.infoText}>
-          <Text style={styles.label}>Similar Past Events:</Text>{" "}
-          {proposal.similar_events}
-        </Text>
+        {proposal.overview && (
+          <Text style={styles.infoText}>
+            <Text style={styles.label}>Overview:</Text> {proposal.overview}
+          </Text>
+        )}
+        {proposal.start_date && (
+          <Text style={styles.infoText}>
+            <Text style={styles.label}>Event Start Date:</Text>{" "}
+            {proposal.start_date}
+          </Text>
+        )}
+        {proposal.end_date && (
+          <Text style={styles.infoText}>
+            <Text style={styles.label}>Event End Date:</Text>{" "}
+            {proposal.end_date}
+          </Text>
+        )}
+        {proposal.objectives && (
+          <Text style={styles.infoText}>
+            <Text style={styles.label}>Objectives:</Text> {proposal.objectives}
+          </Text>
+        )}
+        {proposal.audience && (
+          <Text style={styles.infoText}>
+            <Text style={styles.label}>Audience:</Text> {proposal.audience}
+          </Text>
+        )}
+        {proposal.venue && (
+          <Text style={styles.infoText}>
+            <Text style={styles.label}>Venue:</Text> {proposal.venue}
+          </Text>
+        )}
+        {proposal.attendance && (
+          <Text style={styles.infoText}>
+            <Text style={styles.label}>Approx. Number of Attendees:</Text>{" "}
+            {proposal.attendance}
+          </Text>
+        )}
+        {proposal.tasks_remaining && (
+          <>
+            <Text style={styles.tasksLabel}>Remaining Tasks:</Text>
+            <View style={styles.tasksContainer}>
+              {proposal.tasks_remaining.map((task, index) => (
+                <Text key={index} style={styles.bulletPoint}>
+                  {"\u2022"} {task}
+                </Text>
+              ))}
+            </View>
+          </>
+        )}
+        {proposal.collab_benefits && (
+          <Text style={styles.infoText}>
+            <Text style={styles.label}>Benefits of Collaborating:</Text>{" "}
+            {proposal.collab_benefits}
+          </Text>
+        )}
+        {proposal.budget && (
+          <Text style={styles.infoText}>
+            <Text style={styles.label}>Approx. Budget:</Text> ${proposal.budget}
+          </Text>
+        )}
+        {proposal.similar_events && (
+          <Text style={styles.infoText}>
+            <Text style={styles.label}>Similar Past Events:</Text>{" "}
+            {proposal.similar_events}
+          </Text>
+        )}
         <View style={styles.buttonContainer}>
           <TouchableOpacity
             style={styles.actionButton}
@@ -164,30 +211,30 @@ const ProposalDetailsPage = () => {
       >
         <View style={styles.modalContainer}>
           <View style={styles.modalView}>
+            <Text style={styles.label}>Event Proposed By:</Text>
+            <Text style={styles.club}>{clubName} </Text>
+
             <Text style={styles.modalText}>Express Your Interest</Text>
-            <TextInput
-              style={styles.input}
-              placeholder="Club Name"
-              value={clubName}
-              onChangeText={setClubName}
-            />
-            <Text style={styles.modalLabel}>
-              Which tasks is your club able to help out with?
-            </Text>
 
-            <View style={styles.tasksContainer}>
-              {proposal.tasks_remaining.map((task, index) => (
-                <CheckBox
-                  key={index}
-                  title={task}
-                  checked={checkedItems[index]}
-                  onPress={() => handleCheck(index)}
-                  containerStyle={styles.checkboxContainer}
-                  textStyle={styles.checkboxText}
-                />
-              ))}
-            </View>
-
+            {proposal.tasks_remaining && (
+              <>
+                <Text style={styles.modalLabel}>
+                  Which tasks is your club able to help out with?
+                </Text>
+                <View style={styles.tasksContainer}>
+                  {proposal.tasks_remaining.map((task, index) => (
+                    <CheckBox
+                      key={index}
+                      title={task}
+                      checked={checkedItems[index]}
+                      onPress={() => handleCheck(index)}
+                      containerStyle={styles.checkboxContainer}
+                      textStyle={styles.checkboxText}
+                    />
+                  ))}
+                </View>
+              </>
+            )}
             <TextInput
               style={[styles.input, styles.textArea]}
               placeholder="Additional Information"

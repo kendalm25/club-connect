@@ -25,17 +25,22 @@ export default function HomePage() {
   async function fetchProposals() {
     try {
       setLoading(true);
-      const { data, error } = await supabase.from("proposals").select("*");
-      // .order("created_at", { ascending: false });
+      console.log("Fetching proposals...");
+      const { data, error } = await supabase
+        .from("proposals")
+        .select("*")
+        .order("created_at", { ascending: false });
 
       if (error) {
+        console.error("Error fetching proposals:", error);
         throw error;
       }
 
+      console.log("Fetched Proposals:", data);
       setProposals(data);
     } catch (error) {
       if (error instanceof Error) {
-        Alert.alert(error.message);
+        Alert.alert("Error", error.message);
       }
     } finally {
       setLoading(false);
@@ -43,7 +48,8 @@ export default function HomePage() {
   }
 
   const handlePressProposal = (proposalId) => {
-    router.push(`/mainFeed/proposalDetails?proposalId=${proposalId}`);
+    console.log("Navigating to proposal ID:", proposalId);
+    router.push(`/mainFeed/${proposalId}`);
   };
 
   if (loading) {

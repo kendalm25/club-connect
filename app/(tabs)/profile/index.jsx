@@ -99,7 +99,8 @@ export default function ProfilePage() {
       const { data, error } = await supabase
         .from("proposals")
         .select("*")
-        .eq("club_id", session?.user?.id);
+        .eq("club_id", session?.user?.id)
+        .order("created_at", { ascending: false });
 
       if (error) {
         throw error;
