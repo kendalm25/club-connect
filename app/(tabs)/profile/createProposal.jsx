@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import {
   View,
   Text,
@@ -9,11 +9,15 @@ import {
   TouchableOpacity,
   Alert,
 } from "react-native";
+import { useRouter, useLocalSearchParams } from "expo-router";
 import eventTypes from "../../../assets/eventColors";
+import { supabase } from "../../../lib/supabase";
 
-const CreatePage = ({ onSubmit }) => {
+const CreatePage = () => {
+  const { session: sessionStr } = useLocalSearchParams();
+  const router = useRouter();
+  const [session, setSession] = useState(null);
   const [title, setTitle] = useState("");
-  const [club, setClub] = useState("");
   const [overview, setOverview] = useState("");
   const [objectives, setObjectives] = useState("");
   const [audience, setAudience] = useState("");
@@ -27,8 +31,39 @@ const CreatePage = ({ onSubmit }) => {
   const [tasks, setTasks] = useState([]);
   const [newTask, setNewTask] = useState("");
   const [types, setTypes] = useState([]);
+  const [loading, setLoading] = useState(false);
 
-  // Function to add a new task
+  useEffect(() => {
+    if (sessionStr) {
+      const sessionData = JSON.parse(decodeURIComponent(sessionStr));
+      setSession(sessionData);
+      setLoading(false);
+    }
+  }, [sessionStr]);
+
+  async function createProposal(proposalData) {
+    try {
+      setLoading(true);
+      if (!session?.user) throw new Error("No user on the session!");
+
+      const { error } = await supabase.from("proposals").insert(proposalData);
+
+      if (error) {
+        console.error("Supabase insert error:", error);
+        throw error;
+      }
+
+      const sessionStr = encodeURIComponent(JSON.stringify(session));
+      router.push(`/(tabs)/profile?session=${sessionStr}`);
+    } catch (error) {
+      if (error instanceof Error) {
+        Alert.alert("Error creating proposal", error.message);
+      }
+    } finally {
+      setLoading(false);
+    }
+  }
+
   const addTask = () => {
     if (newTask.trim()) {
       setTasks([...tasks, newTask.trim()]);
@@ -36,7 +71,6 @@ const CreatePage = ({ onSubmit }) => {
     }
   };
 
-  // Function to add or remove an event type
   const toggleType = (type) => {
     if (types.includes(type)) {
       setTypes(types.filter((t) => t !== type));
@@ -45,15 +79,24 @@ const CreatePage = ({ onSubmit }) => {
     }
   };
 
-  // Function to handle form submission
   const handleSubmit = () => {
     if (
       startDate.match(/^\d{4}-\d{2}-\d{2}$/) &&
       endDate.match(/^\d{4}-\d{2}-\d{2}$/)
     ) {
+      // Convert budget to a number and validate
+      const budgetNumber = parseFloat(budget);
+      if (isNaN(budgetNumber)) {
+        Alert.alert(
+          "Invalid Budget",
+          "Please enter a valid number for the budget"
+        );
+        return;
+      }
+
       const proposalData = {
         title,
-        club,
+        club_id: session?.user?.id,
         overview,
         objectives,
         audience,
@@ -62,17 +105,13 @@ const CreatePage = ({ onSubmit }) => {
         venue,
         attendance,
         collab_benefits: collabBenefits,
-        budget,
+        budget: budgetNumber, // Ensure budget is a numeric value
         similar_events: similarEvents,
         tasks,
         types,
       };
 
-      console.log("New Proposal Data:", proposalData);
-
-      if (onSubmit) {
-        onSubmit(proposalData);
-      }
+      createProposal(proposalData);
     } else {
       Alert.alert(
         "Invalid Date Format",
@@ -89,12 +128,6 @@ const CreatePage = ({ onSubmit }) => {
           placeholder="Name of Event"
           value={title}
           onChangeText={setTitle}
-        />
-        <TextInput
-          style={styles.input}
-          placeholder="Club"
-          value={club}
-          onChangeText={setClub}
         />
         <TextInput
           style={[styles.input, styles.textArea]}
@@ -147,7 +180,7 @@ const CreatePage = ({ onSubmit }) => {
         />
         <TextInput
           style={styles.input}
-          placeholder="Approx. Number of Attendees"
+          placeholder="Est. Number of Attendees (please insert a numerical value)"
           value={attendance}
           onChangeText={setAttendance}
         />
@@ -160,7 +193,7 @@ const CreatePage = ({ onSubmit }) => {
         />
         <TextInput
           style={styles.input}
-          placeholder="Approx. Budget"
+          placeholder="Est. Budget (please insert a numerical value)"
           value={budget}
           onChangeText={setBudget}
         />
@@ -226,7 +259,9 @@ const CreatePage = ({ onSubmit }) => {
         </View>
 
         <TouchableOpacity style={styles.submitButton} onPress={handleSubmit}>
-          <Text style={styles.buttonText}>Submit Proposal</Text>
+          <Text style={styles.buttonText}>
+            {loading ? "Submitting..." : "Submit Proposal"}
+          </Text>
         </TouchableOpacity>
       </ScrollView>
     </SafeAreaView>

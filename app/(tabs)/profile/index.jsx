@@ -142,6 +142,12 @@ export default function ProfilePage() {
     }
   }
 
+  const handleGoToCreatePage = () => {
+    console.log("session from profile page: ", session);
+    const sessionData = encodeURIComponent(JSON.stringify(session));
+    router.push(`/(tabs)/profile/createProposal?session=${sessionData}`);
+  };
+
   if (loading) {
     return (
       <View style={styles.loadingContainer}>
@@ -254,9 +260,6 @@ export default function ProfilePage() {
                 {website}
               </Text>
             </Text>
-            <TouchableOpacity onPress={handleSignOut} style={styles.updateBtn}>
-              <Text>Sign Out</Text>
-            </TouchableOpacity>
           </ScrollView>
         )}
         {selectedTab === "Proposals" && (
@@ -264,11 +267,7 @@ export default function ProfilePage() {
             <View style={styles.createBtnContainer}>
               <TouchableOpacity
                 style={styles.createBtn}
-                onPress={() =>
-                  router.push({
-                    pathname: "/(tabs)/profile/createProposal",
-                  })
-                }
+                onPress={handleGoToCreatePage}
               >
                 <Text style={styles.btnText}>+ Create New Proposal</Text>
               </TouchableOpacity>
@@ -277,7 +276,7 @@ export default function ProfilePage() {
               style={styles.scrollView}
               showsVerticalScrollIndicator={false}
             >
-              {proposals.map((proposal) => (
+              {/* {proposals.map((proposal) => (
                 <TouchableOpacity key={proposal.id}>
                   <Proposal
                     title={proposal.title}
@@ -286,10 +285,15 @@ export default function ProfilePage() {
                     club={proposal.club}
                   />
                 </TouchableOpacity>
-              ))}
+              ))} */}
             </ScrollView>
           </View>
         )}
+      </View>
+      <View style={{ alignItems: "center", margin: 10 }}>
+        <TouchableOpacity onPress={handleSignOut} style={styles.signOutBtn}>
+          <Text>Sign Out</Text>
+        </TouchableOpacity>
       </View>
     </SafeAreaView>
   );
@@ -445,6 +449,25 @@ const styles = StyleSheet.create({
     padding: 10,
     alignItems: "center",
     width: "80%",
+    backgroundColor: "white",
+    shadowColor: "#000",
+    shadowOffset: {
+      width: 0,
+      height: 10,
+    },
+    shadowOpacity: 0.1,
+    shadowRadius: 20,
+    elevation: 10,
+  },
+
+  signOutBtn: {
+    borderColor: "#4a4e69",
+    borderWidth: 2,
+    borderRadius: 10,
+    paddingVertical: 7,
+    paddingHorizontal: 30,
+    alignItems: "center",
+    // width: "80%",
     backgroundColor: "white",
     shadowColor: "#000",
     shadowOffset: {

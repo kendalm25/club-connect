@@ -1,6 +1,11 @@
 import React from "react";
 import Layout from "./app/_layout";
+import { SessionProvider } from "./SessionContext";
 
 export default function App() {
-  return <Layout />;
+  return (
+    // <SessionProvider>
+    <Layout />
+    // </SessionProvider>
+  );
 }

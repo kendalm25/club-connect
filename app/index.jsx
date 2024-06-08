@@ -14,6 +14,7 @@ import {
 import { useRouter } from "expo-router";
 import { supabase } from "../lib/supabase";
 import clubFair from "../assets/club_fair.webp";
+import { useSession } from "../SessionContext";
 
 const windowWidth = Dimensions.get("window").width;
 const windowHeight = Dimensions.get("window").height;
@@ -48,11 +49,13 @@ const LoginPage = () => {
 
     if (error) {
       Alert.alert(error.message);
-      setLoading(false);
+    } else if (!session) {
+      Alert.alert("There is no session");
     } else {
       const sessionStr = encodeURIComponent(JSON.stringify(session));
       router.push(`/(tabs)/profile?session=${sessionStr}`);
     }
+    setLoading(false);
   }
 
   async function signUpWithEmail() {
@@ -120,7 +123,7 @@ const LoginPage = () => {
           <Text style={styles.header}>Log In</Text>
           <TextInput
             style={styles.input}
-            placeholder="Email"
+            placeholder="Club Email"
             value={email}
             onChangeText={setEmail}
           />
@@ -131,12 +134,14 @@ const LoginPage = () => {
             onChangeText={setPassword}
             secureTextEntry
           />
-          <TouchableOpacity style={styles.button} onPress={signInWithEmail}>
-            <Text style={styles.btnText}>Log In</Text>
-          </TouchableOpacity>
-          <TouchableOpacity style={styles.button} onPress={showWelcome}>
-            <Text style={styles.btnText}>Back</Text>
-          </TouchableOpacity>
+          <View style={{ marginTop: 20 }}>
+            <TouchableOpacity style={styles.button} onPress={signInWithEmail}>
+              <Text style={styles.btnText}>Sign In</Text>
+            </TouchableOpacity>
+            <TouchableOpacity style={styles.button} onPress={showWelcome}>
+              <Text style={styles.btnText}>Back</Text>
+            </TouchableOpacity>
+          </View>
         </View>
       </SafeAreaView>
     );
@@ -201,7 +206,7 @@ const styles = StyleSheet.create({
     paddingVertical: 12,
     borderRadius: 25,
     marginBottom: 10,
-    width: windowWidth * 0.6,
+    // width: windowWidth * 0.6,
     elevation: 3,
     shadowColor: "#000",
     shadowOffset: { width: 0, height: 2 },
