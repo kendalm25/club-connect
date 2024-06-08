@@ -8,10 +8,10 @@ import {
   TouchableOpacity,
   Alert,
   ActivityIndicator,
-  Modal,
   Button,
   Switch,
 } from "react-native";
+import Modal from "react-native-modal";
 import { useRouter } from "expo-router";
 import { supabase } from "../../../lib/supabase";
 import Proposal from "../../../components/proposalPreview";
@@ -117,13 +117,18 @@ export default function HomePage() {
         )}
       </ScrollView>
 
-      <Modal
+      {/* <Modal
         animationType="slide"
         transparent={true}
         visible={modalVisible}
         onRequestClose={() => {
           setModalVisible(!modalVisible);
         }}
+      > */}
+      <Modal
+        isVisible={modalVisible}
+        animationIn="slideInRight"
+        animationOut="slideOutRight"
       >
         <View style={styles.modalContainer}>
           <View style={styles.modalView}>
@@ -213,13 +218,16 @@ const styles = StyleSheet.create({
     flex: 1,
     justifyContent: "center",
     alignItems: "center",
-    backgroundColor: "rgba(0, 0, 0, 0.5)",
+    // backgroundColor: "rgba(0, 0, 0, 0.5)",
   },
+
   modalView: {
-    width: "80%",
+    width: "95%",
     backgroundColor: "white",
-    borderRadius: 20,
-    padding: 20,
+    borderRadius: 5,
+    paddingHorizontal: 20,
+    paddingTop: 20,
+    paddingBottom: 40,
     alignItems: "center",
     shadowColor: "#000",
     shadowOffset: { width: 0, height: 2 },
