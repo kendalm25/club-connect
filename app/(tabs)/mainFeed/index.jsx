@@ -17,6 +17,8 @@ export default function HomePage() {
   const router = useRouter();
   const [loading, setLoading] = useState(true);
   const [proposals, setProposals] = useState([]);
+  const [profiles, setProfiles] = useState([]);
+  const [clubName, setClubName] = useState("");
 
   useEffect(() => {
     fetchProposals();
@@ -36,6 +38,15 @@ export default function HomePage() {
         throw error;
       }
 
+      const { data: profiles, error: profilesError } = await supabase
+        .from("profiles")
+        .select("id, username");
+
+      if (profilesError) {
+        throw profilesError;
+      }
+      setProfiles(profiles);
+
       console.log("Fetched Proposals:", data);
       setProposals(data);
     } catch (error) {
@@ -50,6 +61,11 @@ export default function HomePage() {
   const handlePressProposal = (proposalId) => {
     console.log("Navigating to proposal ID:", proposalId);
     router.push(`/mainFeed/${proposalId}`);
+  };
+
+  const getClubName = (clubId) => {
+    const profile = profiles.find((profile) => profile.id === clubId);
+    return profile ? profile.username : "Unknown Club";
   };
 
   if (loading) {
@@ -82,7 +98,7 @@ export default function HomePage() {
                 title={proposal.title}
                 overview={proposal.overview}
                 type={proposal.types || []} // Ensure types is always an array
-                club={proposal.club}
+                club={getClubName(proposal.club_id)}
               />
             </TouchableOpacity>
           ))
