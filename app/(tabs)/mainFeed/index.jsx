@@ -8,6 +8,9 @@ import {
   TouchableOpacity,
   Alert,
   ActivityIndicator,
+  Modal,
+  Button,
+  Switch,
 } from "react-native";
 import { useRouter } from "expo-router";
 import { supabase } from "../../../lib/supabase";
@@ -18,7 +21,8 @@ export default function HomePage() {
   const [loading, setLoading] = useState(true);
   const [proposals, setProposals] = useState([]);
   const [profiles, setProfiles] = useState([]);
-  const [clubName, setClubName] = useState("");
+  const [modalVisible, setModalVisible] = useState(false);
+  const [isSwitchOn, setIsSwitchOn] = useState(false);
 
   useEffect(() => {
     fetchProposals();
@@ -68,6 +72,10 @@ export default function HomePage() {
     return profile ? profile.username : "Unknown Club";
   };
 
+  const handleToggleSwitch = () => {
+    setModalVisible(true);
+  };
+
   if (loading) {
     return (
       <View style={styles.loadingContainer}>
@@ -79,7 +87,11 @@ export default function HomePage() {
   return (
     <SafeAreaView style={styles.container}>
       <View style={styles.header}>
+        <View></View>
         <Text style={styles.headerText}>ClubConnect</Text>
+        <TouchableOpacity onPress={() => setModalVisible(true)}>
+          <Text style={styles.infoButton}>i</Text>
+        </TouchableOpacity>
       </View>
 
       <ScrollView
@@ -104,6 +116,52 @@ export default function HomePage() {
           ))
         )}
       </ScrollView>
+
+      <Modal
+        animationType="slide"
+        transparent={true}
+        visible={modalVisible}
+        onRequestClose={() => {
+          setModalVisible(!modalVisible);
+        }}
+      >
+        <View style={styles.modalContainer}>
+          <View style={styles.modalView}>
+            <Text style={styles.modalText}>Community Norms</Text>
+            <Text style={styles.normsText}>
+              Thank you for using ClubConnect!
+            </Text>
+            <Text style={styles.normsText}>
+              Please adhere to the following community norms to ensure a
+              collaborative and productive environment: {"\n"}
+            </Text>
+
+            <Text style={styles.normsText}>
+              1. Clubs should propose no more than three proposals per week.
+            </Text>
+            <Text style={styles.normsText}>
+              2. Proposals should be genuine and aimed at fostering
+              collaboration with other organizations.
+            </Text>
+            <Text style={styles.normsText}>
+              3. Proposals should not be used merely to advertise upcoming
+              events.
+            </Text>
+            <Text style={styles.normsText}>
+              4. Ensure that your proposals have clear objectives and benefits
+              for potential collaborators.
+            </Text>
+            <Text style={styles.normsText}>
+              5. Be respectful and considerate in all your interactions with
+              other clubs and organizations.
+            </Text>
+            <Button
+              title="Close"
+              onPress={() => setModalVisible(!modalVisible)}
+            />
+          </View>
+        </View>
+      </Modal>
     </SafeAreaView>
   );
 }
@@ -113,12 +171,13 @@ const styles = StyleSheet.create({
     flex: 1,
     backgroundColor: "#f0f0f0",
   },
-
   header: {
     padding: 20,
     backgroundColor: "#ffffff",
     width: "100%",
     alignItems: "center",
+    justifyContent: "space-between",
+    flexDirection: "row",
     shadowColor: "#000",
     shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 0.1,
@@ -130,22 +189,53 @@ const styles = StyleSheet.create({
     color: "#333",
     fontWeight: "bold",
   },
-
+  infoButton: {
+    fontSize: 24,
+    color: "#4a4e69",
+    fontWeight: "bold",
+  },
   scrollView: {
     marginVertical: 10,
   },
-
   loadingContainer: {
     flex: 1,
     alignItems: "center",
     justifyContent: "center",
     backgroundColor: "#f0f0f0",
   },
-
   noProposalsText: {
     textAlign: "center",
     marginTop: 20,
     fontSize: 18,
     color: "#888",
+  },
+  modalContainer: {
+    flex: 1,
+    justifyContent: "center",
+    alignItems: "center",
+    backgroundColor: "rgba(0, 0, 0, 0.5)",
+  },
+  modalView: {
+    width: "80%",
+    backgroundColor: "white",
+    borderRadius: 20,
+    padding: 20,
+    alignItems: "center",
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.25,
+    shadowRadius: 4,
+    elevation: 5,
+  },
+  modalText: {
+    marginBottom: 15,
+    textAlign: "center",
+    fontSize: 18,
+    fontWeight: "bold",
+  },
+  normsText: {
+    fontSize: 16,
+    textAlign: "center",
+    marginBottom: 10,
   },
 });

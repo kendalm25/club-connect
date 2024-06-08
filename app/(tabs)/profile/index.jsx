@@ -309,14 +309,14 @@ export default function ProfilePage() {
               showsVerticalScrollIndicator={false}
             >
               {proposals.map((proposal) => (
-                <TouchableOpacity key={proposal.id}>
+                <View key={proposal.id}>
                   <Proposal
                     title={proposal.title}
                     overview={proposal.overview}
                     type={proposal.types}
                     club={clubName}
                   />
-                </TouchableOpacity>
+                </View>
               ))}
             </ScrollView>
           </View>
