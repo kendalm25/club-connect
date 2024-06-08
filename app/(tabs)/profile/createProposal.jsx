@@ -54,7 +54,7 @@ const CreatePage = () => {
       }
 
       const sessionStr = encodeURIComponent(JSON.stringify(session));
-      router.push(`/(tabs)/profile?session=${sessionStr}`);
+      router.navigate(`/(tabs)/profile?session=${sessionStr}`);
     } catch (error) {
       if (error instanceof Error) {
         Alert.alert("Error creating proposal", error.message);

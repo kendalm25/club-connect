@@ -45,6 +45,7 @@ export default function ProfilePage() {
   const [clubProfilePic, setClubProfilePic] = useState("");
   const [selectedTab, setSelectedTab] = useState("ClubInfo");
   const [editMode, setEditMode] = useState(false);
+  const [proposals, setProposals] = useState([]);
 
   useEffect(() => {
     if (sessionStr) {
@@ -57,6 +58,7 @@ export default function ProfilePage() {
   useEffect(() => {
     if (session) {
       getProfile();
+      fetchProposals();
       setLoading(false);
     }
   }, [session]);
@@ -88,6 +90,29 @@ export default function ProfilePage() {
       }
     }
     setLoading(false);
+  }
+  async function fetchProposals() {
+    try {
+      setLoading(true);
+      if (!session?.user) throw new Error("No user on the session!");
+
+      const { data, error } = await supabase
+        .from("proposals")
+        .select("*")
+        .eq("club_id", session?.user?.id);
+
+      if (error) {
+        throw error;
+      }
+
+      setProposals(data);
+    } catch (error) {
+      if (error instanceof Error) {
+        Alert.alert(error.message);
+      }
+    } finally {
+      setLoading(false);
+    }
   }
 
   async function updateProfile({
@@ -143,7 +168,6 @@ export default function ProfilePage() {
   }
 
   const handleGoToCreatePage = () => {
-    console.log("session from profile page: ", session);
     const sessionData = encodeURIComponent(JSON.stringify(session));
     router.push(`/(tabs)/profile/createProposal?session=${sessionData}`);
   };
@@ -276,16 +300,16 @@ export default function ProfilePage() {
               style={styles.scrollView}
               showsVerticalScrollIndicator={false}
             >
-              {/* {proposals.map((proposal) => (
+              {proposals.map((proposal) => (
                 <TouchableOpacity key={proposal.id}>
                   <Proposal
                     title={proposal.title}
                     overview={proposal.overview}
-                    type={proposal.type}
-                    club={proposal.club}
+                    type={proposal.types}
+                    club={clubName}
                   />
                 </TouchableOpacity>
-              ))} */}
+              ))}
             </ScrollView>
           </View>
         )}
@@ -467,7 +491,6 @@ const styles = StyleSheet.create({
     paddingVertical: 7,
     paddingHorizontal: 30,
     alignItems: "center",
-    // width: "80%",
     backgroundColor: "white",
     shadowColor: "#000",
     shadowOffset: {

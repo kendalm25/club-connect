@@ -2,7 +2,7 @@ import React from "react";
 import { View, Text, StyleSheet } from "react-native";
 import eventTypes from "../assets/eventColors";
 
-const Proposal = ({ title, overview, type, club }) => {
+const Proposal = ({ title, overview, type = [], club }) => {
   const backgroundColors = type.map((t) => eventTypes[t] || "#fff").join(", "); // Simple example of combining colors
   return (
     <View style={styles.container}>

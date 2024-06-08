@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import {
   View,
   Text,
@@ -10,10 +10,11 @@ import {
   Modal,
   TextInput,
   Button,
+  Alert,
 } from "react-native";
 import { CheckBox } from "react-native-elements";
 import { useLocalSearchParams } from "expo-router";
-import proposals from "../../../data/proposals.json"; // Adjust to the correct relative path
+import { supabase } from "../../../lib/supabase";
 import eventTypes from "../../../assets/eventColors";
 
 const windowHeight = Dimensions.get("window").height;
@@ -21,14 +22,34 @@ const windowHeight = Dimensions.get("window").height;
 const ProposalDetailsPage = () => {
   const { proposalId } = useLocalSearchParams();
   const numericProposalId = parseInt(proposalId, 10);
-  const proposal = proposals.find((p) => p.id === numericProposalId);
-
-  const [checkedItems, setCheckedItems] = useState(
-    proposal.tasks_remaining.map(() => false)
-  );
+  const [proposal, setProposal] = useState(null);
+  const [checkedItems, setCheckedItems] = useState([]);
   const [modalVisible, setModalVisible] = useState(false);
   const [clubName, setClubName] = useState("");
   const [additionalInfo, setAdditionalInfo] = useState("");
+
+  useEffect(() => {
+    fetchProposal();
+  }, [proposalId]);
+
+  const fetchProposal = async () => {
+    try {
+      const { data, error } = await supabase
+        .from("proposals")
+        .select("*")
+        .eq("id", numericProposalId)
+        .single();
+
+      if (error) {
+        throw error;
+      }
+
+      setProposal(data);
+      setCheckedItems(data.tasks_remaining.map(() => false));
+    } catch (error) {
+      Alert.alert("Error fetching proposal", error.message);
+    }
+  };
 
   const handleCheck = (index) => {
     const newCheckedItems = [...checkedItems];
@@ -65,7 +86,7 @@ const ProposalDetailsPage = () => {
             <Text style={styles.label}>Proposed By:</Text> {proposal.club}
           </Text>
           <View style={styles.typeContainer}>
-            {proposal.type.map((t, index) => (
+            {proposal.types.map((t, index) => (
               <Text
                 key={index}
                 style={[

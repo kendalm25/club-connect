@@ -6,69 +6,45 @@ import {
   SafeAreaView,
   ScrollView,
   TouchableOpacity,
-  Modal,
-  Dimensions,
   Alert,
   ActivityIndicator,
 } from "react-native";
-import { useRouter, useLocalSearchParams } from "expo-router";
+import { useRouter } from "expo-router";
 import { supabase } from "../../../lib/supabase";
-
-import proposals from "../../../data/proposals.json";
 import Proposal from "../../../components/proposalPreview";
-
-const windowHeight = Dimensions.get("window").height;
 
 export default function HomePage() {
   const router = useRouter();
-  const { session: sessionStr } = useLocalSearchParams();
-  const [session, setSession] = useState(null);
-  const [loading, setLoading] = useState(false);
-
-  const handlePressProposal = (proposalId) => {
-    console.log("Navigating to proposal ID:", proposalId);
-    router.push(`/mainFeed/${proposalId}`);
-  };
+  const [loading, setLoading] = useState(true);
+  const [proposals, setProposals] = useState([]);
 
   useEffect(() => {
-    supabase.auth.getSession().then(({ data: { session } }) => {
-      setSession(session);
-      console.log(session);
-    });
-
-    supabase.auth.onAuthStateChange((_event, session) => {
-      setSession(session);
-    });
+    fetchProposals();
   }, []);
 
-  async function getProfile() {
+  async function fetchProposals() {
     try {
       setLoading(true);
-      if (!session?.user) throw new Error("No user on the session!");
+      const { data, error } = await supabase.from("proposals").select("*");
+      // .order("created_at", { ascending: false });
 
-      const { data, error, status } = await supabase
-        .from("profiles")
-        .select("username, website, avatar_url, mission, contact_email")
-        .eq("id", session?.user.id)
-        .single();
-      if (error && status !== 406) {
+      if (error) {
         throw error;
       }
 
-      if (data) {
-        setClubName(data.username);
-        setMission(data.mission);
-        setEmail(data.contact_email);
-        setWebsite(data.website);
-        setClubProfilePic(data.avatar_url);
-      }
+      setProposals(data);
     } catch (error) {
       if (error instanceof Error) {
         Alert.alert(error.message);
       }
+    } finally {
+      setLoading(false);
     }
-    setLoading(false);
   }
+
+  const handlePressProposal = (proposalId) => {
+    router.push(`/mainFeed/proposalDetails?proposalId=${proposalId}`);
+  };
 
   if (loading) {
     return (
@@ -88,19 +64,23 @@ export default function HomePage() {
         style={styles.scrollView}
         showsVerticalScrollIndicator={false}
       >
-        {proposals.map((proposal) => (
-          <TouchableOpacity
-            key={proposal.id}
-            onPress={() => handlePressProposal(proposal.id)}
-          >
-            <Proposal
-              title={proposal.title}
-              overview={proposal.overview}
-              type={proposal.type}
-              club={proposal.club}
-            />
-          </TouchableOpacity>
-        ))}
+        {proposals.length === 0 ? (
+          <Text style={styles.noProposalsText}>No proposals found.</Text>
+        ) : (
+          proposals.map((proposal) => (
+            <TouchableOpacity
+              key={proposal.id}
+              onPress={() => handlePressProposal(proposal.id)}
+            >
+              <Proposal
+                title={proposal.title}
+                overview={proposal.overview}
+                type={proposal.types || []} // Ensure types is always an array
+                club={proposal.club}
+              />
+            </TouchableOpacity>
+          ))
+        )}
       </ScrollView>
     </SafeAreaView>
   );
@@ -131,5 +111,19 @@ const styles = StyleSheet.create({
 
   scrollView: {
     marginVertical: 10,
+  },
+
+  loadingContainer: {
+    flex: 1,
+    alignItems: "center",
+    justifyContent: "center",
+    backgroundColor: "#f0f0f0",
+  },
+
+  noProposalsText: {
+    textAlign: "center",
+    marginTop: 20,
+    fontSize: 18,
+    color: "#888",
   },
 });
