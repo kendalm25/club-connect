@@ -55,27 +55,36 @@ const App = () => {
     }
   }
 
-  // Helper function to format event data for Calendar
+  const isValidDate = (dateString) => {
+    const date = new Date(dateString);
+    return !isNaN(date.getTime());
+  };
+
   const formatEventsForCalendar = (events) => {
     const formattedEvents = {};
     events.forEach((event) => {
-      const startDate = event.start_date;
-      const endDate = event.end_date || startDate; // If no end date, use start date
-      let currentDate = startDate;
-      while (currentDate <= endDate) {
-        formattedEvents[currentDate] = {
-          marked: true,
-          dotColor: "#333",
-          selected: currentDate === selectedDate,
-          selectedColor: currentDate === selectedDate ? "#333" : undefined,
-        };
-        currentDate = new Date(
-          new Date(currentDate).setDate(new Date(currentDate).getDate() + 1)
-        )
-          .toISOString()
-          .split("T")[0];
+      if (isValidDate(event.start_date)) {
+        let currentDate = event.start_date;
+        const endDate = isValidDate(event.end_date)
+          ? event.end_date
+          : event.start_date;
+
+        while (new Date(currentDate) <= new Date(endDate)) {
+          formattedEvents[currentDate] = {
+            marked: true,
+            dotColor: "#333",
+            selected: currentDate === selectedDate,
+            selectedColor: currentDate === selectedDate ? "#333" : undefined,
+          };
+          currentDate = new Date(
+            new Date(currentDate).setDate(new Date(currentDate).getDate() + 1)
+          )
+            .toISOString()
+            .split("T")[0];
+        }
       }
     });
+
     if (selectedDate) {
       formattedEvents[selectedDate] = {
         ...formattedEvents[selectedDate],
@@ -94,7 +103,8 @@ const App = () => {
   const renderEventDetails = () => {
     const selectedEvents = eventsData.filter(
       (event) =>
-        event.start_date <= selectedDate && event.end_date >= selectedDate
+        (!event.start_date || event.start_date <= selectedDate) &&
+        (!event.end_date || event.end_date >= selectedDate)
     );
     return (
       <FlatList

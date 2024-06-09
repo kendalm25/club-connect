@@ -80,44 +80,49 @@ const CreatePage = () => {
   };
 
   const handleSubmit = () => {
-    if (
-      startDate.match(/^\d{4}-\d{2}-\d{2}$/) &&
-      endDate.match(/^\d{4}-\d{2}-\d{2}$/)
-    ) {
-      // Convert budget to a number and validate
-      const budgetNumber = parseFloat(budget);
-      if (isNaN(budgetNumber)) {
-        Alert.alert(
-          "Invalid Budget",
-          "Please enter a valid number for the budget"
-        );
-        return;
-      }
-
-      const proposalData = {
-        title,
-        club_id: session?.user?.id,
-        overview,
-        objectives,
-        audience,
-        start_date: startDate,
-        end_date: endDate,
-        venue,
-        attendance,
-        collab_benefits: collabBenefits,
-        budget: budgetNumber, // Ensure budget is a numeric value
-        similar_events: similarEvents,
-        tasks,
-        types,
-      };
-
-      createProposal(proposalData);
-    } else {
+    const budgetNumber = parseFloat(budget);
+    if (isNaN(budgetNumber)) {
       Alert.alert(
-        "Invalid Date Format",
-        "Please enter dates in the YYYY-MM-DD format"
+        "Invalid Budget",
+        "Please enter a valid number for the budget"
       );
+      return;
     }
+    const attendanceNumber = parseFloat(attendance);
+    if (isNaN(attendanceNumber)) {
+      Alert.alert(
+        "Invalid Attendance",
+        "Please enter a valid number for the attendance"
+      );
+      return;
+    }
+
+    if (!title || !overview || !attendance || !budget || types.length === 0) {
+      Alert.alert(
+        "Missing Required Fields",
+        "Please fill in all required fields: Name of Event, Overview, Estimated Attendance, Estimated Budget, and at least one Event Type."
+      );
+      return;
+    }
+
+    const proposalData = {
+      title,
+      club_id: session?.user?.id,
+      overview,
+      objectives,
+      audience,
+      start_date: startDate,
+      end_date: endDate,
+      venue,
+      attendance,
+      collab_benefits: collabBenefits,
+      budget: budgetNumber, // Ensure budget is a numeric value
+      similar_events: similarEvents,
+      tasks,
+      types,
+    };
+
+    createProposal(proposalData);
   };
 
   return (
@@ -125,13 +130,13 @@ const CreatePage = () => {
       <ScrollView contentContainerStyle={styles.scrollViewContent}>
         <TextInput
           style={styles.input}
-          placeholder="Name of Event"
+          placeholder="Name of Event (required)"
           value={title}
           onChangeText={setTitle}
         />
         <TextInput
           style={[styles.input, styles.textArea]}
-          placeholder="Overview"
+          placeholder="Overview (required)"
           value={overview}
           onChangeText={setOverview}
           multiline
@@ -180,7 +185,7 @@ const CreatePage = () => {
         />
         <TextInput
           style={styles.input}
-          placeholder="Est. Number of Attendees (please insert a numerical value)"
+          placeholder="Est. Number of Attendees (required)"
           value={attendance}
           onChangeText={setAttendance}
         />
@@ -193,7 +198,7 @@ const CreatePage = () => {
         />
         <TextInput
           style={styles.input}
-          placeholder="Est. Budget (please insert a numerical value)"
+          placeholder="Est. Budget (required)"
           value={budget}
           onChangeText={setBudget}
         />
@@ -205,30 +210,10 @@ const CreatePage = () => {
           multiline
         />
 
-        {/* Tasks Section */}
         <View style={styles.tasksSection}>
-          <Text style={styles.tasksTitle}>Remaining Tasks</Text>
-          {tasks.map((task, index) => (
-            <Text key={index} style={styles.taskItem}>
-              {index + 1}. {task}
-            </Text>
-          ))}
-          <View style={styles.taskInputContainer}>
-            <TextInput
-              style={styles.taskInput}
-              placeholder="Add a new task"
-              value={newTask}
-              onChangeText={setNewTask}
-            />
-            <TouchableOpacity style={styles.addTaskButton} onPress={addTask}>
-              <Text style={styles.buttonText}>+</Text>
-            </TouchableOpacity>
-          </View>
-        </View>
-
-        {/* Event Types Section */}
-        <View style={styles.tasksSection}>
-          <Text style={styles.tasksTitle}>Event Type (Select up to 3)</Text>
+          <Text style={styles.tasksTitle}>
+            Event Type (Select at least one)
+          </Text>
           <View style={styles.typesContainer}>
             {Object.entries(eventTypes).map(([type, color], index) => {
               const isSelected = types.includes(type);
