@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import {
   View,
   Text,
@@ -9,11 +9,15 @@ import {
   TouchableOpacity,
   Alert,
 } from "react-native";
+import { useRouter, useLocalSearchParams } from "expo-router";
 import eventTypes from "../../../assets/eventColors";
+import { supabase } from "../../../lib/supabase";
 
-const CreatePage = ({ onSubmit }) => {
+const CreatePage = () => {
+  const { session: sessionStr } = useLocalSearchParams();
+  const router = useRouter();
+  const [session, setSession] = useState(null);
   const [title, setTitle] = useState("");
-  const [club, setClub] = useState("");
   const [overview, setOverview] = useState("");
   const [objectives, setObjectives] = useState("");
   const [audience, setAudience] = useState("");
@@ -27,8 +31,39 @@ const CreatePage = ({ onSubmit }) => {
   const [tasks, setTasks] = useState([]);
   const [newTask, setNewTask] = useState("");
   const [types, setTypes] = useState([]);
+  const [loading, setLoading] = useState(false);
 
-  // Function to add a new task
+  useEffect(() => {
+    if (sessionStr) {
+      const sessionData = JSON.parse(decodeURIComponent(sessionStr));
+      setSession(sessionData);
+      setLoading(false);
+    }
+  }, [sessionStr]);
+
+  async function createProposal(proposalData) {
+    try {
+      setLoading(true);
+      if (!session?.user) throw new Error("No user on the session!");
+
+      const { error } = await supabase.from("proposals").insert(proposalData);
+
+      if (error) {
+        console.error("Supabase insert error:", error);
+        throw error;
+      }
+
+      const sessionStr = encodeURIComponent(JSON.stringify(session));
+      router.navigate(`/(tabs)/profile?session=${sessionStr}`);
+    } catch (error) {
+      if (error instanceof Error) {
+        Alert.alert("Error creating proposal", error.message);
+      }
+    } finally {
+      setLoading(false);
+    }
+  }
+
   const addTask = () => {
     if (newTask.trim()) {
       setTasks([...tasks, newTask.trim()]);
@@ -36,7 +71,6 @@ const CreatePage = ({ onSubmit }) => {
     }
   };
 
-  // Function to add or remove an event type
   const toggleType = (type) => {
     if (types.includes(type)) {
       setTypes(types.filter((t) => t !== type));
@@ -45,40 +79,50 @@ const CreatePage = ({ onSubmit }) => {
     }
   };
 
-  // Function to handle form submission
   const handleSubmit = () => {
-    if (
-      startDate.match(/^\d{4}-\d{2}-\d{2}$/) &&
-      endDate.match(/^\d{4}-\d{2}-\d{2}$/)
-    ) {
-      const proposalData = {
-        title,
-        club,
-        overview,
-        objectives,
-        audience,
-        start_date: startDate,
-        end_date: endDate,
-        venue,
-        attendance,
-        collab_benefits: collabBenefits,
-        budget,
-        similar_events: similarEvents,
-        tasks,
-        types,
-      };
-
-      console.log("New Proposal Data:", proposalData);
-
-      if (onSubmit) {
-        onSubmit(proposalData);
-      }
-    } else {
+    const budgetNumber = parseFloat(budget);
+    if (isNaN(budgetNumber)) {
       Alert.alert(
-        "Invalid Date Format",
-        "Please enter dates in the YYYY-MM-DD format"
+        "Invalid Budget",
+        "Please enter a valid number for the budget"
       );
+      return;
     }
+    const attendanceNumber = parseFloat(attendance);
+    if (isNaN(attendanceNumber)) {
+      Alert.alert(
+        "Invalid Attendance",
+        "Please enter a valid number for the attendance"
+      );
+      return;
+    }
+
+    if (!title || !overview || !attendance || !budget || types.length === 0) {
+      Alert.alert(
+        "Missing Required Fields",
+        "Please fill in all required fields: Name of Event, Overview, Estimated Attendance, Estimated Budget, and at least one Event Type."
+      );
+      return;
+    }
+
+    const proposalData = {
+      title,
+      club_id: session?.user?.id,
+      overview,
+      objectives,
+      audience,
+      start_date: startDate,
+      end_date: endDate,
+      venue,
+      attendance,
+      collab_benefits: collabBenefits,
+      budget: budgetNumber, // Ensure budget is a numeric value
+      similar_events: similarEvents,
+      tasks,
+      types,
+    };
+
+    createProposal(proposalData);
   };
 
   return (
@@ -86,19 +130,13 @@ const CreatePage = ({ onSubmit }) => {
       <ScrollView contentContainerStyle={styles.scrollViewContent}>
         <TextInput
           style={styles.input}
-          placeholder="Name of Event"
+          placeholder="Name of Event (required)"
           value={title}
           onChangeText={setTitle}
         />
         <TextInput
-          style={styles.input}
-          placeholder="Club"
-          value={club}
-          onChangeText={setClub}
-        />
-        <TextInput
           style={[styles.input, styles.textArea]}
-          placeholder="Overview"
+          placeholder="Overview (required)"
           value={overview}
           onChangeText={setOverview}
           multiline
@@ -147,7 +185,7 @@ const CreatePage = ({ onSubmit }) => {
         />
         <TextInput
           style={styles.input}
-          placeholder="Approx. Number of Attendees"
+          placeholder="Est. Number of Attendees (required)"
           value={attendance}
           onChangeText={setAttendance}
         />
@@ -160,7 +198,7 @@ const CreatePage = ({ onSubmit }) => {
         />
         <TextInput
           style={styles.input}
-          placeholder="Approx. Budget"
+          placeholder="Est. Budget (required)"
           value={budget}
           onChangeText={setBudget}
         />
@@ -172,30 +210,10 @@ const CreatePage = ({ onSubmit }) => {
           multiline
         />
 
-        {/* Tasks Section */}
         <View style={styles.tasksSection}>
-          <Text style={styles.tasksTitle}>Remaining Tasks</Text>
-          {tasks.map((task, index) => (
-            <Text key={index} style={styles.taskItem}>
-              {index + 1}. {task}
-            </Text>
-          ))}
-          <View style={styles.taskInputContainer}>
-            <TextInput
-              style={styles.taskInput}
-              placeholder="Add a new task"
-              value={newTask}
-              onChangeText={setNewTask}
-            />
-            <TouchableOpacity style={styles.addTaskButton} onPress={addTask}>
-              <Text style={styles.buttonText}>+</Text>
-            </TouchableOpacity>
-          </View>
-        </View>
-
-        {/* Event Types Section */}
-        <View style={styles.tasksSection}>
-          <Text style={styles.tasksTitle}>Event Type (Select up to 3)</Text>
+          <Text style={styles.tasksTitle}>
+            Event Type (Select at least one)
+          </Text>
           <View style={styles.typesContainer}>
             {Object.entries(eventTypes).map(([type, color], index) => {
               const isSelected = types.includes(type);
@@ -226,7 +244,9 @@ const CreatePage = ({ onSubmit }) => {
         </View>
 
         <TouchableOpacity style={styles.submitButton} onPress={handleSubmit}>
-          <Text style={styles.buttonText}>Submit Proposal</Text>
+          <Text style={styles.buttonText}>
+            {loading ? "Submitting..." : "Submit Proposal"}
+          </Text>
         </TouchableOpacity>
       </ScrollView>
     </SafeAreaView>

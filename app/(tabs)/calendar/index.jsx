@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import {
   View,
   StyleSheet,
@@ -6,36 +6,85 @@ import {
   Dimensions,
   Text,
   FlatList,
+  Alert,
+  TouchableOpacity,
 } from "react-native";
 import { Calendar } from "react-native-calendars";
-import eventsData from "../../../data/proposals.json"; // Adjust the path based on your file structure
+import { supabase } from "../../../lib/supabase";
+import Ionicons from "@expo/vector-icons/Ionicons";
 
 const windowWidth = Dimensions.get("window").width;
 
 const App = () => {
   const [selectedDate, setSelectedDate] = useState("");
+  const [eventsData, setEventsData] = useState([]);
+  const [profiles, setProfiles] = useState([]);
+  const [loading, setLoading] = useState(true);
 
-  // Helper function to format event data for Calendar
+  useEffect(() => {
+    fetchProposalsAndProfiles();
+  }, []);
+
+  async function fetchProposalsAndProfiles() {
+    try {
+      setLoading(true);
+      const { data: proposals, error: proposalsError } = await supabase
+        .from("proposals")
+        .select("id, title, overview, club_id, venue, start_date, end_date");
+
+      if (proposalsError) {
+        throw proposalsError;
+      }
+
+      const { data: profiles, error: profilesError } = await supabase
+        .from("profiles")
+        .select("id, username");
+
+      if (profilesError) {
+        throw profilesError;
+      }
+
+      setEventsData(proposals);
+      setProfiles(profiles);
+    } catch (error) {
+      if (error instanceof Error) {
+        Alert.alert("Error", error.message);
+      }
+    } finally {
+      setLoading(false);
+    }
+  }
+
+  const isValidDate = (dateString) => {
+    const date = new Date(dateString);
+    return !isNaN(date.getTime());
+  };
+
   const formatEventsForCalendar = (events) => {
     const formattedEvents = {};
     events.forEach((event) => {
-      const startDate = event.start_date;
-      const endDate = event.end_date;
-      let currentDate = startDate;
-      while (currentDate <= endDate) {
-        formattedEvents[currentDate] = {
-          marked: true,
-          dotColor: "#333",
-          selected: currentDate === selectedDate,
-          selectedColor: currentDate === selectedDate ? "#333" : undefined,
-        };
-        currentDate = new Date(
-          new Date(currentDate).setDate(new Date(currentDate).getDate() + 1)
-        )
-          .toISOString()
-          .split("T")[0];
+      if (isValidDate(event.start_date)) {
+        let currentDate = event.start_date;
+        const endDate = isValidDate(event.end_date)
+          ? event.end_date
+          : event.start_date;
+
+        while (new Date(currentDate) <= new Date(endDate)) {
+          formattedEvents[currentDate] = {
+            marked: true,
+            dotColor: "#333",
+            selected: currentDate === selectedDate,
+            selectedColor: currentDate === selectedDate ? "#333" : undefined,
+          };
+          currentDate = new Date(
+            new Date(currentDate).setDate(new Date(currentDate).getDate() + 1)
+          )
+            .toISOString()
+            .split("T")[0];
+        }
       }
     });
+
     if (selectedDate) {
       formattedEvents[selectedDate] = {
         ...formattedEvents[selectedDate],
@@ -46,10 +95,16 @@ const App = () => {
     return formattedEvents;
   };
 
+  const getClubName = (clubId) => {
+    const profile = profiles.find((profile) => profile.id === clubId);
+    return profile ? profile.username : "Unknown Club";
+  };
+
   const renderEventDetails = () => {
     const selectedEvents = eventsData.filter(
       (event) =>
-        event.start_date <= selectedDate && event.end_date >= selectedDate
+        (!event.start_date || event.start_date <= selectedDate) &&
+        (!event.end_date || event.end_date >= selectedDate)
     );
     return (
       <FlatList
@@ -58,19 +113,34 @@ const App = () => {
         renderItem={({ item }) => (
           <View style={styles.event}>
             <Text style={styles.eventTitle}>{item.title}</Text>
-            <Text style={styles.club}>{item.club}</Text>
+            <Text style={styles.club}>{getClubName(item.club_id)}</Text>
             <Text style={styles.eventDescription}>{item.overview}</Text>
-            <Text style={styles.eventDetails}>Location: {item.venue}</Text>
+            {item.venue && (
+              <Text style={styles.eventDetails}>Location: {item.venue}</Text>
+            )}
           </View>
         )}
       />
     );
   };
 
+  if (loading) {
+    return (
+      <View style={styles.loadingContainer}>
+        <Text>Loading...</Text>
+      </View>
+    );
+  }
+
   return (
     <SafeAreaView style={styles.container}>
       <View style={styles.header}>
+        <View></View>
         <Text style={styles.headerText}>Calendar</Text>
+
+        <TouchableOpacity onPress={() => fetchProposalsAndProfiles()}>
+          <Ionicons name="refresh" size={24} color="#4a4e69" />
+        </TouchableOpacity>
       </View>
 
       <Calendar
@@ -135,11 +205,13 @@ const styles = StyleSheet.create({
     backgroundColor: "#ffffff",
     width: "100%",
     alignItems: "center",
+    justifyContent: "space-between",
     shadowColor: "#000",
     shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 0.1,
     shadowRadius: 3,
     elevation: 4,
+    flexDirection: "row",
   },
   headerText: {
     fontSize: 24,
@@ -174,6 +246,11 @@ const styles = StyleSheet.create({
   eventDetails: {
     fontSize: 14,
     color: "#333",
+  },
+  loadingContainer: {
+    flex: 1,
+    justifyContent: "center",
+    alignItems: "center",
   },
 });
 

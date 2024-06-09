@@ -1,5 +1,7 @@
 import { Tabs } from "expo-router";
 import Ionicons from "@expo/vector-icons/Ionicons";
+import { useRouter } from "expo-router";
+import { useSession } from "../../SessionContext";
 
 export default function AppLayout() {
   return (
@@ -28,7 +30,6 @@ export default function AppLayout() {
           ),
         }}
       />
-
       <Tabs.Screen
         name="profile"
         options={{
@@ -42,7 +43,7 @@ export default function AppLayout() {
       <Tabs.Screen
         name="index"
         options={{
-          tabBarButton: () => null, // Hides the button from the tab bar
+          tabBarButton: () => null,
         }}
       />
     </Tabs>

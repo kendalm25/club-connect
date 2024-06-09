@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import {
   View,
   Text,
@@ -8,15 +8,18 @@ import {
   Dimensions,
   TouchableOpacity,
   ScrollView,
+  Alert,
+  ActivityIndicator,
+  TextInput,
   Linking,
 } from "react-native";
-
-import { useRouter } from "expo-router";
+import { useRouter, useLocalSearchParams } from "expo-router";
 import clubImage from "../../../assets/club-image.png";
-import proposals from "../../../data/ssieProposals.json";
 import Proposal from "../../../components/proposalPreview";
-import clubData from "../../../data/clubData.json";
 import defaultProfilePic from "../../../assets/defaultProfilePic.webp";
+import { supabase } from "../../../lib/supabase";
+import Ionicons from "@expo/vector-icons/Ionicons";
+
 const windowHeight = Dimensions.get("window").height;
 const windowWidth = Dimensions.get("window").width;
 
@@ -31,15 +34,232 @@ const Tab = ({ title, isSelected, onPress }) => (
   </TouchableOpacity>
 );
 
-const HomePage = () => {
-  const [selectedTab, setSelectedTab] = useState("ClubInfo");
+export default function ProfilePage() {
   const router = useRouter();
+  const { session: sessionStr } = useLocalSearchParams();
+  const [session, setSession] = useState(null);
+  const [loading, setLoading] = useState(true);
+  const [clubName, setClubName] = useState("");
+  const [email, setEmail] = useState("");
+  const [mission, setMission] = useState("");
+  const [website, setWebsite] = useState("");
+  const [clubProfilePic, setClubProfilePic] = useState("");
+  const [selectedTab, setSelectedTab] = useState("ClubInfo");
+  const [editMode, setEditMode] = useState(false);
+  const [proposals, setProposals] = useState([]);
+
+  useEffect(() => {
+    if (sessionStr) {
+      const sessionData = JSON.parse(decodeURIComponent(sessionStr));
+      setSession(sessionData);
+      setLoading(false);
+    }
+  }, [sessionStr]);
+
+  useEffect(() => {
+    if (session) {
+      getProfile();
+      fetchProposals();
+      setLoading(false);
+      setEmail(session?.user?.email);
+    }
+  }, [session]);
+
+  async function getProfile() {
+    try {
+      setLoading(true);
+      if (!session?.user) throw new Error("No user on the session!");
+
+      const { data, error, status } = await supabase
+        .from("profiles")
+        .select("username, website, avatar_url, mission, contact_email")
+        .eq("id", session?.user.id)
+        .single();
+      if (error && status !== 406) {
+        throw error;
+      }
+
+      if (data) {
+        setClubName(data.username);
+        setMission(data.mission);
+        setEmail(session?.user?.email);
+        setWebsite(data.website);
+        setClubProfilePic(data.avatar_url);
+      }
+    } catch (error) {
+      if (error instanceof Error) {
+        Alert.alert(error.message);
+      }
+    }
+    setLoading(false);
+  }
+  async function fetchProposals() {
+    try {
+      setLoading(true);
+      if (!session?.user) throw new Error("No user on the session!");
+
+      const { data, error } = await supabase
+        .from("proposals")
+        .select("*")
+        .eq("club_id", session?.user?.id)
+        .order("created_at", { ascending: false });
+
+      if (error) {
+        console.error("Error fetching proposals:", error);
+        throw error;
+      }
+
+      setProposals(data);
+    } catch (error) {
+      if (error instanceof Error) {
+        Alert.alert(error.message);
+      }
+    } finally {
+      setLoading(false);
+    }
+  }
+
+  async function updateProfile({
+    username,
+    website,
+    avatar_url,
+    mission,
+    contact_email,
+  }) {
+    try {
+      setLoading(true);
+      if (!session?.user) throw new Error("No user on the session!");
+
+      const updates = {
+        id: session?.user.id,
+        username,
+        website,
+        avatar_url,
+        mission,
+        contact_email,
+        updated_at: new Date(),
+      };
+
+      const { error } = await supabase.from("profiles").upsert(updates);
+
+      if (error) {
+        throw error;
+      }
+    } catch (error) {
+      if (error instanceof Error) {
+        Alert.alert(error.message);
+      }
+    } finally {
+      setEditMode(false);
+      setLoading(false);
+    }
+  }
+
+  async function handleSignOut() {
+    try {
+      const { error } = await supabase.auth.signOut();
+      if (error) {
+        throw error;
+      }
+      // Clear session and navigate to login or home page
+      setSession(null);
+      router.replace("/"); // Adjust the route to your login or home page
+    } catch (error) {
+      if (error instanceof Error) {
+        Alert.alert("Sign Out Error", error.message);
+      }
+    }
+  }
+
+  const handleGoToCreatePage = () => {
+    const sessionData = encodeURIComponent(JSON.stringify(session));
+    router.push(`/(tabs)/profile/createProposal?session=${sessionData}`);
+  };
+
+  if (loading) {
+    return (
+      <View style={styles.loadingContainer}>
+        <ActivityIndicator size="large" color="#4a4e69" />
+      </View>
+    );
+  }
 
   return (
     <SafeAreaView style={styles.container}>
       <View style={styles.profileHeader}>
-        <Image source={clubImage} style={styles.profilePic} />
-        <Text style={styles.profileName}>{clubData[0].club_name}</Text>
+        <View style={styles.picAndClubContainer}>
+          <Image
+            source={
+              clubProfilePic ? { uri: clubProfilePic } : defaultProfilePic
+            }
+            style={styles.profilePic}
+          />
+          <Text style={styles.profileName}>{clubName}</Text>
+        </View>
+        {editMode ? (
+          <>
+            <TextInput
+              style={styles.input}
+              value={clubName}
+              onChangeText={setClubName}
+              placeholder="Club Name"
+            />
+            <TextInput
+              style={styles.input}
+              value={clubProfilePic}
+              onChangeText={setClubProfilePic}
+              placeholder="Image URL"
+            />
+            <TextInput
+              style={styles.input}
+              value={email}
+              onChangeText={setEmail}
+              placeholder="Club Email"
+            />
+            <TextInput
+              style={styles.input}
+              value={mission}
+              onChangeText={setMission}
+              placeholder="Mission Statement"
+            />
+            <TextInput
+              style={styles.input}
+              value={website}
+              onChangeText={setWebsite}
+              placeholder="Website"
+            />
+            <TouchableOpacity
+              onPress={() =>
+                updateProfile({
+                  username: clubName,
+                  website,
+                  avatar_url: clubProfilePic,
+                  mission,
+                  contact_email: email,
+                })
+              }
+              disabled={loading}
+              style={styles.updateBtn}
+            >
+              <Text>Save Changes</Text>
+            </TouchableOpacity>
+            <TouchableOpacity
+              onPress={() => setEditMode(!editMode)}
+              style={styles.updateBtn}
+            >
+              <Text>Cancel</Text>
+            </TouchableOpacity>
+          </>
+        ) : (
+          <>
+            <TouchableOpacity
+              onPress={() => setEditMode(!editMode)}
+              style={styles.updateBtn}
+            >
+              <Text>Update Profile</Text>
+            </TouchableOpacity>
+          </>
+        )}
       </View>
       <View style={styles.tabBar}>
         <Tab
@@ -60,51 +280,20 @@ const HomePage = () => {
             showsVerticalScrollIndicator={false}
           >
             <Text style={styles.contentHeader}>Mission Statement:</Text>
-            <Text style={styles.contentText}>
-              {clubData[0].mission_statement}
-            </Text>
-
-            <Text style={styles.contentHeader}>Leadership:</Text>
-            <ScrollView
-              horizontal
-              showsHorizontalScrollIndicator={false}
-              contentContainerStyle={styles.leadershipContainer}
-            >
-              {clubData[0].leaders.map((leader, index) => (
-                <View key={index} style={styles.leaderCard}>
-                  <Image
-                    source={
-                      leader.image ? { uri: leader.image } : defaultProfilePic
-                    }
-                    style={styles.leaderImage}
-                  />
-                  <Text style={styles.leaderName}>{leader.name}</Text>
-                  <Text style={styles.leaderRole}>{leader.role}</Text>
-                </View>
-              ))}
-            </ScrollView>
-
+            <Text style={styles.contentText}>{mission}</Text>
             <Text style={styles.contentHeader}>Contact Information:</Text>
-            <Text style={styles.contentText}>Email: {clubData[0].email}</Text>
-            <Text
-              style={styles.linkText}
-              onPress={() => Linking.openURL(clubData[0].website)}
-            >
-              Website: {clubData[0].website}
+            <Text style={styles.contentText}>
+              Email: {session?.user?.email}
             </Text>
-            <Text
-              style={styles.linkText}
-              onPress={() =>
-                Linking.openURL(
-                  `https://instagram.com/${clubData[0].instagram}`
-                )
-              }
-            >
-              Instagram: {clubData[0].instagram}
+            <Text style={styles.contentText}>
+              Website:{" "}
+              <Text
+                style={{ color: "blue" }}
+                onPress={() => Linking.openURL(website)}
+              >
+                {website}
+              </Text>
             </Text>
-
-            <Text style={styles.contentHeader}>Join Us:</Text>
-            <Text style={styles.contentText}>{clubData[0].join_info}</Text>
           </ScrollView>
         )}
         {selectedTab === "Proposals" && (
@@ -112,13 +301,15 @@ const HomePage = () => {
             <View style={styles.createBtnContainer}>
               <TouchableOpacity
                 style={styles.createBtn}
-                onPress={() =>
-                  router.push({
-                    pathname: "/(tabs)/profile/createProposal",
-                  })
-                }
+                onPress={handleGoToCreatePage}
               >
-                <Text style={styles.btnText}>+ Create New Proposal</Text>
+                <Text style={styles.btnText}> Create New Proposal</Text>
+              </TouchableOpacity>
+              <TouchableOpacity
+                style={styles.createBtn}
+                onPress={() => fetchProposals()}
+              >
+                <Ionicons name="refresh" size={20} color="#4a4e69" />
               </TouchableOpacity>
             </View>
             <ScrollView
@@ -126,27 +317,39 @@ const HomePage = () => {
               showsVerticalScrollIndicator={false}
             >
               {proposals.map((proposal) => (
-                <TouchableOpacity key={proposal.id}>
+                <View key={proposal.id}>
                   <Proposal
                     title={proposal.title}
                     overview={proposal.overview}
-                    type={proposal.type}
-                    club={proposal.club}
+                    type={proposal.types}
+                    club={clubName}
                   />
-                </TouchableOpacity>
+                </View>
               ))}
             </ScrollView>
           </View>
         )}
       </View>
+      <View style={{ alignItems: "center", margin: 10 }}>
+        <TouchableOpacity onPress={handleSignOut} style={styles.signOutBtn}>
+          <Text>Sign Out</Text>
+        </TouchableOpacity>
+      </View>
     </SafeAreaView>
   );
-};
+}
 
 const styles = StyleSheet.create({
   container: {
     flex: 1,
     alignItems: "center",
+    backgroundColor: "#f0f0f0",
+  },
+
+  loadingContainer: {
+    flex: 1,
+    alignItems: "center",
+    justifyContent: "center",
     backgroundColor: "#f0f0f0",
   },
 
@@ -163,6 +366,11 @@ const styles = StyleSheet.create({
     marginBottom: 10,
   },
 
+  picAndClubContainer: {
+    alignItems: "center",
+    paddingBottom: 20,
+  },
+
   profilePic: {
     width: 120,
     height: 120,
@@ -174,6 +382,15 @@ const styles = StyleSheet.create({
     fontSize: 22,
     fontWeight: "bold",
     color: "#333",
+  },
+
+  input: {
+    width: "80%",
+    padding: 10,
+    borderColor: "#ccc",
+    borderWidth: 1,
+    borderRadius: 5,
+    marginBottom: 10,
   },
 
   tabBar: {
@@ -247,13 +464,54 @@ const styles = StyleSheet.create({
   createBtnContainer: {
     marginVertical: 15,
     alignItems: "center",
+    flexDirection: "row",
+    justifyContent: "center",
+    gap: 20,
+    // flex: 1,
   },
 
   createBtn: {
     borderRadius: 10,
+    // height: 50,
+    padding: 10,
+    alignItems: "center",
+    // width: "80%",
+    backgroundColor: "white",
+    shadowColor: "#000",
+    shadowOffset: {
+      width: 0,
+      height: 10,
+    },
+    shadowOpacity: 0.1,
+    shadowRadius: 20,
+    elevation: 10,
+  },
+
+  updateBtn: {
+    borderColor: "#4a4e69",
+    borderWidth: 2,
+    borderRadius: 10,
     padding: 10,
     alignItems: "center",
     width: "80%",
+    backgroundColor: "white",
+    shadowColor: "#000",
+    shadowOffset: {
+      width: 0,
+      height: 10,
+    },
+    shadowOpacity: 0.1,
+    shadowRadius: 20,
+    elevation: 10,
+  },
+
+  signOutBtn: {
+    borderColor: "#4a4e69",
+    borderWidth: 2,
+    borderRadius: 10,
+    paddingVertical: 7,
+    paddingHorizontal: 30,
+    alignItems: "center",
     backgroundColor: "white",
     shadowColor: "#000",
     shadowOffset: {
@@ -303,5 +561,3 @@ const styles = StyleSheet.create({
     color: "#666",
   },
 });
-
-export default HomePage;
